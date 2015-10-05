@@ -1,0 +1,11 @@
+[dir_structs]
+indir:data/pcs/bumps
+outdir:data/meshes/bumps
+pathdir:recon
+[poisson]
+poisson_script:poisson_recon.sh
+depth:10
+scale:1.25
+solverDivide:8
+isoDivide:8
+samplesPerNode:1.0

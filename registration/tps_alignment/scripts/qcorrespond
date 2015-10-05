@@ -1,0 +1,25 @@
+#!/bin/bash
+dest_dir=$1
+num_scripts=$2
+shift
+shift
+sample_rate=0.00075
+if [[ $# > 0 ]]; then sample_rate=$1; shift; fi
+
+mkdir -p $dest_dir
+
+for (( i=0; i < $num_scripts; i++ ))
+  do j=${dest_dir}/qsub_${i}.txt
+  echo \#!/bin/bash > $j
+  echo \#PBS -S /bin/bash >> $j
+  echo \#PBS -l nodes=1 >> $j
+  echo cd $PWD >> $j
+done
+
+script_num=0;
+for i in $(cat pre_list.txt)
+  do j=$(basename $i pre)txt
+  k=${dest_dir}/qsub_${script_num}.txt
+  echo \(time correspond -kd 5 $* -bbox ../bbox.dat $i pre_list.txt $sample_rate \) \> corr_$j 2\> err_$j >> $k
+  script_num=$(( ($script_num + 1) % $num_scripts ))
+done

@@ -1,0 +1,13 @@
+[sampler]
+pathdir:bin
+sampling_type:uniform
+infile:modeling/models/bumps/bumps.mpu
+outfile:data/pcs/bumps/bumps_0.npts
+[uniform]
+exec_name:uniform_sampler
+camera_res_x:50
+camera_res_y:50
+scan_res:9
+min_range:70.0000000
+registration_error:0.4000000
+normal_type:2

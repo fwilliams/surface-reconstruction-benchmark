@@ -1,0 +1,219 @@
+tps_alignment
+Copyright 2007 - 2008 Benedict Brown
+
+tps_alignment is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 3 as
+published by the Free Software Foundation.
+
+tps_alignment is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Compilation:
+------------
+
+tps_alignment requires the TNT matrix library (math.nist.gov/tnt) and
+the trimesh2 library (http://www.cs.princeton.edu/gfx/proj/trimesh2/).
+
+The makefile assumes that all three programs are subdirectories of the
+same parent directory.  If not, update the paths in src/Makefile.
+Then type "make" in the src directory.
+
+tps_alignment should compile cleanly on Linux.  For Mac OS X and
+Windows, you must create a Makedefs.Darwin or Makedefs.Windows files
+(look at trimesh2 for examples).  Small source modifications may also
+be required.
+
+Running:
+--------
+
+All instructions are written for the bash shell.
+
+Simple Case:
+
+For rigid-body alignment of small models, a "rigid_alignment.sh"
+script is included in the scripts subdirectory.  This will perform all
+steps, ultimately writing the the .xf transform files for the
+alignment to the global/rigid subdirectory of the current directory.
+The script will create the global/rigid and all other necessary
+subdirectories.  It assumes that all binaries are in your path.
+
+Aligning the Bunny:
+
+A standard test case is to align the Stanford bunny.  The
+rigid_alignment script does not work out of the box in this case,
+because units in the Stanford bunny are not millimeters.  They seem to
+be meters.  You will need to change "-min_target_dist 3" to
+"-min_taret_dist 0.003".  If you enable vrip, you will need to divide
+the resolution (0.25 by default) and ramplength by 1000 as well.  You
+may also want to increase the sampling rate to the correspond command
+from 0.001 to 0.01.
+
+Complex Case:
+
+There are several steps to aligning models, most of which are
+performed by the above script.  But for large models and non-rigid
+alignments, it makes sense to run the pieces separately.  This makes
+it easier to tweak options, and to parallelize the correspondence
+computations.
+
+First, we need to cache mesh bounding boxes, so we can avoid trying to
+align meshes which don't overlap:
+
+\ls *.ply | preprocess -bbox bbox.dat
+
+preprocess can cache smoothed normals and curvatures also, which is
+important for large data sets:
+
+(for i in *.ply; do echo $i; echo ${i%ply}pre; done) | \
+   preprocess -curve bbox.dat \
+              -dn <normal_smoothing_amount> \
+              -dc <curvature_smoothing_amount>
+
+This will write a .pre file corresponding to each .ply which caches
+exactly the information needed to compute correspondences.
+
+---
+
+Next, we need to compute correspondences.  The correspondence program
+must be called once for each range scan, but each instance can be run
+on a different system.  You can use the qcorresond script in the
+script directory to generate all the necessary correspond calls.  The
+resulting scripts can be submitted to a rocks cluster using the qsub
+command, or simply run from a shell:
+
+mkdir global
+cd global
+\ls ../*.pre > pre_list.txt
+qcorrespond dst_dir num_scripts sample_rate [-nolocal]
+
+-nolocal turns off locally-weighted ICP, which yields a significant
+speedup if scans are not warped.
+
+* If you have not preprocessed the meshes, then you can list the .ply
+(or .off, or any other format supported by trimesh2) to pre_list.txt
+instead.  For small models this is fine; for large ones it will result
+in an unacceptable slowdown.
+
+e.g. qcorresond qsub 60 0.000075 will divvy all the instances of
+correspondences into 60 shell scripts, and use 0.0075% of the vertices
+as features (this is a good setting for DMP data; small models need a
+much higher sampling rate--try 0.001 or 0.01).
+
+Now run each of the generated scripts.
+
+* A separate qcorrespond_fur script is included for Forma Urbis Romae
+data.  This turns on the [Gelfand03]-style stability sampling for
+certain pairs of range scans where it is necessary.  Except in very
+unusual circumstances, the default stability sampling works much
+better.
+
+---
+
+Third, scans much be warped:
+
+A sample script for running global registration is included in
+scripts/greg.  This will set up the input file for global
+registration, and copute both rigid and nonrigid alignments, which
+will be placed in the rigid and nonrigid subdirectories.  It will use
+two threads to run alignments; if you have a different number of cores
+available on your system, change the -nthreads parameter.  If you
+don't need the rigid or non-rigid alignment, you can removed the -r or
+-nr options.  Note that some meshes may be discarded as unstable in
+this process.  If you think too many meshes are being rejected, try
+increasing the sample rate for correspondences.
+
+---
+
+Finally, the model must be merged
+
+Various merging algorithms exist.  scripts/tps_vrip is a sample script
+for using pvrip.  Note that VRIP requires meshes to be properly
+reoriented on input; the autorient program does this.  The tps_vrip
+script shows how to prepare the input files and reorient meshes for
+VRIP.  A simpler alternative is the Poisson Reconstruction algorithm
+of Kazhdan, Bolitho and Hoppe, available at
+http://www.cs.jhu.edu/~misha/Code/PoissonRecon/.  To prepare the input
+for this algorithm, use the included ply2vn program:
+
+ ply2vn *.ply > input.dat
+
+input.dat is a binary file, so be sure to pass --binary to PoissonRecon.
+
+---
+
+Additional options:
+
+correspond (and qcorrespond) accepts the following options:
+
+-nolocal: turn off locally-weighted ICP
+-read_xf: Look for a .xf file containing the transformation for each
+          mesh.  If this is not specified, the mesh is assumed to have
+          an initial aligning transformation pre-applied.
+
+* For additional options, see src/correspond.cc; they generally do
+* not need to be set.
+
+global_reg (and greg) accepts the following options:
+
+-r, -nr, -aff: Specify that rigid, non-rigid or affine alignments
+               should be written.  Each option should be followed by a
+               prefix for the filenames.  If they should go in a
+               subdirectory, be sure to include the "/", e.g. "-r
+               rigid/".  Note that the greg sample script has -r and
+               -nr hard-coded.  Any combination of these may be
+               specified.
+-read_xf:  read a .xf transformation file for each mesh
+-write_xf: for rigid alignment, write a .xf transformation file rather
+           than the full mesh
+-nthreads: The number of threads to spawn for computing and applying
+           warps.  Set this to the number of cores available on your
+           system.  Note that point position uses only a single
+           thread, but is generally quick.
+-min_target_dist: The minimum allowed distance between feature points
+                  (in mesh units).  Features closer than this distance
+                  to each other will be thinned out.  For Digital
+                  Michelangelo data, 8 is a good setting, for smaller
+                  meshes, try 3.
+
+* For additional options, see include/global_reg.h
+
+----
+
+Interactive experimentation:
+
+The interactive utility can be used to explore the behavior of
+locally-weighted ICP.  This program performs a standard ICP alignment
+of two meshes, then provides an interface to explore locally-weighted
+ICP and visualize the results.  Call it like this:
+
+interactive mesh1.ply mesh2.ply [ options ]
+
+You can also use any trimesh2-supported mesh format, .pre files, or
+scanalyze-style .set files (together with the -res option).
+
+Options:
+
+-dg -dn -dc: specify smoothing amount for geometry, normals and
+             curvature
+-el [ length ]: prune edges longer than length
+-ss: sort stabilities as in "Geometrically Stable Sampling" rather
+     than sampling them as a pdf.  This applies only to the initial
+     unweighted ICP; after that it's controlled by an option in the
+     interface.
+-res [ res ]: Use resolution res from the scanalyze-style .set files.
+              This implies that .set files are used rather than
+              meshes.
+
+* Affine ICP is known to be unstable, and is not recommended ever.
+
+Changes:
+--------
+
+20070804: Initial release
+20081211: Fixed a rigid alignment bug when reading and writing .xf files; added documention about the bunny
+20081222: Added support for untriangulated point clouds.

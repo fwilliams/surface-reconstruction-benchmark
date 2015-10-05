@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Benedict Brown
+# Princeton University
+#
+# Sample script for running pvrip on aligned data
+#
+# The script creates a vrip subdirectory of the current directory,
+# puts reoriented versions of all .ply files in the current directory
+# into it, then runs pvrip.
+#
+# An optional argument is the name of the loadlimit file for loadbalance,
+# otherwise one is created.
+#
+# Any parameters to pvrip must be changed in the script itself.
+
+rm -rf vrip
+mkdir vrip
+cd vrip
+for i in ../*.ply; do mesh_filter $i -noconf $(basename $i); done
+for i in *.ply; do echo "bmesh $i 0 0 0 0 0 0 1" >> vrip.conf; done
+autorient vrip.conf
+if [[ "$1" == "" ]]
+  then echo "localhost 1.9" > loadlimit
+else
+  pushd ..
+  cp $1 vrip/loadlimit
+  popd
+fi
+pvripsplit 400 vrip.conf
+pvrip2 out.ply 1 400 loadlimit -ramplength 15

@@ -1,0 +1,5 @@
+- Upgrade to Visual Studio 2008 project files
+- Make OpenMesh g++-4.3 buildable
+- Bugfix and changes to Off reader and writer 
+- Allow Vertex colors Texcoords and normals in off
+- ported to qt4

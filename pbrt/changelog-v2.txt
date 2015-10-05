@@ -1,0 +1,3971 @@
+commit e5106fbc9595a82d00a68be4929359e2bc256056
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Dec 19 12:21:26 2010 -0800
+
+    Fix checked-in pregenerated pbrtlex.cpp file to #include pbrtparse.hpp
+    always, not try to include pbrtparse.hh.  Should fix makefile builds on mac
+    and linux.
+
+ src/core/pbrtlex.cpp |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit 9e97945e6fe9a0b911b7a455d157f231d03f1894
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Dec 19 10:54:43 2010 -0800
+
+    Improve error messages when incorrect number of control points is provided
+    to NURBS shape.
+
+ src/shapes/nurbs.cpp |   20 +++++++++++++++++---
+ 1 files changed, 17 insertions(+), 3 deletions(-)
+
+commit 79d56d33df5aa4435f66fcf3c3938cc0b0e35936
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Nov 18 14:21:26 2010 -0800
+
+    Modify Makefile-based build to use pbrtparse.hpp in pbrtlex.ll,
+    not pbrtparse.hh.  (Fixes build breakage for Linux/Mac builds due
+    to the recent change of including flex/bison'ed outputs for the convenience
+    of people building on Windows.)
+
+ src/Makefile        |    4 ++--
+ src/core/pbrtlex.ll |    4 +---
+ 2 files changed, 3 insertions(+), 5 deletions(-)
+
+commit 6987ffc5977c8bc70c950ce923aa985cc03b4ad9
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 8 12:09:42 2010 -0800
+
+    Add Transform Transpose() helper function.
+
+ src/core/transform.h |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit d91f960d83c5d4f02f66d5024f5a0b2c4f11e8d6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 8 11:57:39 2010 -0800
+
+    remove unimplemented AnimatedTransform::InterpolateInverse() method declaration
+
+ src/core/transform.h |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 04dbb8dfa0394f4725750ae9fb179ed5d0a0fcfe
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 2 06:32:29 2010 -0700
+
+    Fix bug in BRDFToBTDF::Pdf() identified by phresnel.
+    (http://github.com/mmp/pbrt-v2/issues#issue/2)
+
+ src/core/reflection.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 975da773549781f0f77c0b12fac424a82dd617d9
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 1 14:34:28 2010 -0700
+
+    one more tweak to k computation in PhaseSchlick
+
+ src/core/volume.cpp |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 1ea75d7805c0ae5892a453aefe16c36b0df8a528
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 27 09:48:10 2010 -0700
+
+    Added improved mapping from volume scattering asymmetry g parameter to k
+    parameter of Schlick's function, derived by Thies Heidecke.
+    (See http://pbrt.org/bugtracker/view.php?id=102).
+
+ src/core/volume.cpp |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 0a8f9207765d52279c972024459ed325350033c1
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 26 10:48:40 2010 -0700
+
+    Fix RegularHalfangleBRDF::f() to handle the case where the two
+    direction vectors are in the hemisphere opposite the surface normal.
+
+ src/core/reflection.cpp |   12 +++++++++---
+ 1 files changed, 9 insertions(+), 3 deletions(-)
+
+commit e99c0a40a656dab2537c0ff2c84565e9a3f2b646
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Oct 25 15:38:45 2010 -0700
+
+    Revert "Fix bugs related to computing Fresnel term in specular transmission."
+    
+    This reverts commit e2140b42bdce21f30e193a6a429748d29f35d639.
+    
+    Upon further consideration, this fix was unnecessary (and is a no-op).  The
+    key detail is that FresnelDielectric::Evaluate() swaps eta_i and eta_t
+    based on the sign of cosi and thus computes the correct result in the end.
+
+ src/core/reflection.cpp |    5 ++---
+ src/core/reflection.h   |    4 +++-
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+commit e2140b42bdce21f30e193a6a429748d29f35d639
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Oct 25 15:17:27 2010 -0700
+
+    Fix bugs related to computing Fresnel term in specular transmission.
+    (Reported by Vishal Kochhar and Artem Kharitonyuk.)
+    In short, passing the cosine of 'wo' is incorrect for rays that
+    are not entering the medium.  This can be fixed (and the intent made more
+    clear), by removing the FresnelDielectric object from the
+    SpecularTransmission BxDF implementation and replacing the line that
+    computes the Fresnel term with "Spectrum F = FrDiel(AbsCosTheta(wo),
+    fabsf(cost), ei, et);".
+
+ src/core/reflection.cpp |    5 +++--
+ src/core/reflection.h   |    4 +---
+ 2 files changed, 4 insertions(+), 5 deletions(-)
+
+commit a4b681a07c69d32a8321f026ddd965f12a59adb2
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Oct 25 14:02:51 2010 -0700
+
+    Fix bug in Transmittance() computation in PathIntegrator (Volodymyr Kachurovskyi).
+    The transmittance term was incorrectly not being included for the bounce
+    after the first intersection of the path.
+
+ src/integrators/path.cpp |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 5d607fa03037293fa638e67d89f5bdf15f6c88ed
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 21 10:32:21 2010 -0700
+
+    New MSVC 2008 build system from Robert Graf.
+    Switches to same approach as MSVC 2010 build; external
+    dependencies (OpenEXR, libtiff, zlib) are all automatically
+    built from source included in the pbrt distribution.
+
+ cleanup.bat                                  |    2 +
+ src/README_BUILDING_MSVC2008.txt             |   98 ++-
+ src/pbrt.vs2010/bsdftest.vcxproj             |    8 +-
+ src/pbrt.vs2010/exravg.vcxproj               |    8 +-
+ src/pbrt.vs2010/exrdiff.vcxproj              |    8 +-
+ src/pbrt.vs2010/exrtotiff.vcxproj            |    8 +-
+ src/pbrt.vs2010/libpbrt.vcxproj              |  560 +++++++-------
+ src/pbrt.vs2010/libpbrt.vcxproj.filters      | 1124 +++++++++++++-------------
+ src/pbrt.vs2010/pbrt.sln                     |   13 +-
+ src/pbrt.vs2010/pbrt.vcxproj                 |    8 +-
+ src/pbrt.vs2010/ply2pbrt.vcxproj             |    8 +-
+ src/pbrt.vs2010/prebuild.cmd                 |    2 +-
+ src/pbrt.vs2010/tifftoexr.vcxproj            |    8 +-
+ 13 files changed, 948 insertions(+), 907 deletions(-)
+
+commit 6074c0dbae2bb23e1b985cbb903f07d92d5650ba
+Author: U-mmp-PC\mmp <mmp@mmp-PC.(none)>
+Date:   Mon Oct 18 15:58:55 2010 -0700
+
+    Integrate new MSVC 2010 build system from Robert Graf (goof@tamu.edu)
+
+ .gitignore              |    6 +++---
+ src/README_BUILDING.txt |   28 +++++-----------------------
+ src/tools/ply.c         |    3 +++
+ src/tools/ply2pbrt.c    |    2 +-
+ 4 files changed, 12 insertions(+), 27 deletions(-)
+
+commit 6da08c8b5d0fcbe232741399899f65881198adfe
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Oct 17 06:56:37 2010 -0700
+
+    Fix declaration of RejectionSampleDisk() to match definition.
+    (Thomas Schlömer).
+
+ src/core/montecarlo.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 051ce4f41337f4952961bf16f79db045a915f45f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Oct 17 06:55:31 2010 -0700
+
+    Fixes to disk intersection routine for better numerical stability
+    when v ~= 1.  (Thomas Schlömer).
+
+ src/shapes/disk.cpp |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+commit cd046810bc5e268b2723466572aba3c317bd2757
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 9 10:10:36 2010 -0700
+
+    Done with first pass of writing file format reference documentation.
+
+ docs/fileformat.html    |  290 ++++++++++++++++++++++++++++++++++-------------
+ docs/fileformat.pdf     |  Bin 262162 -> 276115 bytes
+ docs/src/fileformat.txt |  261 +++++++++++++++++++++++++++++++-----------
+ docs/usersguide.pdf     |  Bin 18170 -> 18167 bytes
+ 4 files changed, 407 insertions(+), 144 deletions(-)
+
+commit 156ed14b7cdc2edd7f83fc8a548327efec9eb56e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 8 08:58:07 2010 -0700
+
+    Update file format documentation; now written up to materials section
+
+ docs/fileformat.html |  622 ++++++++++++++++++++++++++++++++------------------
+ docs/fileformat.pdf  |  Bin 243805 -> 262162 bytes
+ docs/usersguide.html |    1 +
+ docs/usersguide.pdf  |  Bin 18169 -> 18170 bytes
+ 4 files changed, 401 insertions(+), 222 deletions(-)
+
+commit 6aa811715271fba8d25833e97bb3523f4b697584
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Oct 4 15:24:47 2010 -0700
+
+    Initialize d[uv]d[xy] to 0 in all DifferentialGeometry constructor code paths.
+    (Cleanup, likely to save risk of uninitialized memory reads down the line.)
+
+ src/core/diffgeom.h |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 268e87e2b744ae7a49fa8b037ff83942c92ec19f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Sep 30 16:46:59 2010 -0700
+
+    Don't allow "null" volume integrator any more; lots of code
+    doesn't handle the notion of it being NULL.
+
+ src/core/api.cpp |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit df3f48a14e93bb76d82d69477e3c65e6702fc172
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Sep 30 16:43:59 2010 -0700
+
+    Add documentation of BRDF file formats in comment in source code.
+
+ src/materials/measured.cpp |   43 +++++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 43 insertions(+), 0 deletions(-)
+
+commit 3dcf422698b3f6b3531a863f44a973b9e050594c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 29 16:43:10 2010 -0700
+
+    Small cleanup: more consistently use PBRT_IS_APPLE, etc., #defines
+    to distinguish among architectures (versus __APPLE__, etc.)
+
+ src/core/memory.cpp   |    4 ++--
+ src/core/parallel.cpp |   12 ++++++------
+ src/core/parallel.h   |   15 ++++++++-------
+ src/core/pbrt.h       |   15 ++++++++++-----
+ 4 files changed, 26 insertions(+), 20 deletions(-)
+
+commit e779a74d3b1cc085990dae57ced9583f4e64cfd3
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 29 16:31:38 2010 -0700
+
+    Removed experimental SDL support for image display while rendering.
+    (This wasn't a good approach after all; had quite a few issues.)
+
+ src/film/image.cpp |   85 ----------------------------------------------------
+ src/film/image.h   |    6 ----
+ src/main/pbrt.cpp  |    9 -----
+ 3 files changed, 0 insertions(+), 100 deletions(-)
+
+commit ad2ffc64a876ec9ace928b41521dd5fc0deb45e6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 29 16:24:19 2010 -0700
+
+    Allow "spectrum" as a synonym for "color" in Texture definitions in input files.
+
+ src/core/api.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 83c4e2327aadce803ee88e09e359753f81f7cae2
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 29 16:19:48 2010 -0700
+
+    Add operator== and operator!= for Vector, Point, Normal, BBox.
+
+ src/core/geometry.h |   31 ++++++++++++++++++++++++++++---
+ 1 files changed, 28 insertions(+), 3 deletions(-)
+
+commit aeefa8b9f09b7cfd41421485afbc81b7146b1d50
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Sep 28 16:18:27 2010 -0700
+
+    Rename "nsamples" parameter for RandomSampler to "pixelsamples";
+    be consistent with most of the other samplers.
+
+ src/samplers/random.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 9cacbc2f20e15288b8df8965d3d83f27f489103c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Sep 17 10:23:09 2010 -0700
+
+    Fix bug in the bias compensation term in the IGIIntegrator.
+    http://pbrt.org/bugtracker/view.php?id=98
+    Thanks to Jan Novak for the report and the fix.
+
+ src/integrators/igi.cpp |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit f5c42ded8c588b56caedf078e4ee53dcb31e2975
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Sep 16 09:12:25 2010 -0700
+
+    use new pathname resolution code for sampled SPD filenames as well
+
+ src/core/paramset.cpp |   15 ++++++++-------
+ 1 files changed, 8 insertions(+), 7 deletions(-)
+
+commit 55c77fe49d708d3ef324544ea6eabf2515728c37
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 15 16:01:22 2010 -0700
+
+    Fix two important bugs in the DipoleSubsurfaceIntegrator.
+    First, the computation of zneg in the DiffusionReflectance constructor should have had a negation before the initializer expression for zneg.
+    Second, the computation of Rd in DiffusionReflectance::operator() should have had an alphap scale factor.
+    Thanks to Eugene d'Eon.
+
+ src/integrators/dipolesubsurface.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 0796d5153d9777aaa0a2b285251d6d02bb48e73c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 15 14:55:19 2010 -0700
+
+    Fix area element computation for subsurface scattering.
+    When computing the approximate area for the irradiance sample points generated
+    for subsurface scattering, the radius of the circle should *half* of the minimum
+    sample distance used in the Poisson check.
+    Thanks for Robert Szymiec.
+
+ src/renderers/surfacepoints.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit da242d58fc3e7b0ec85b02eae9b007b8152db2ed
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Sep 11 14:11:20 2010 -0700
+
+    Add <climits> include to core/fileutil.cpp.
+    Fixes build on Linux.
+    Thanks to Sebastian Lipponer <sebastian.lipponer@gmx.de>.
+
+ src/core/fileutil.cpp |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 25ec996c31e510076ef4712bfee6f02adbfe40f6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Sep 9 09:46:05 2010 -0700
+
+    Fix directory references in zlib build settings.
+    Fixes http://pbrt.org/bugtracker/view.php?id=97.
+
+ src/windows/3rdparty/zlib/zlib.vcproj |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 2dbf6a94aae9978fa1431e3ea5801074ffff8b9a
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 8 10:15:33 2010 -0700
+
+    fixes for windows build when there are spaces in the pathname
+
+ src/windows/3rdparty/IlmImf/IlmImf.vcproj |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 8589722f159cd9ed4bab85bce0997be41fc275b0
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Sep 8 10:04:01 2010 -0700
+
+    fixes for new file path handling in windows build
+
+ src/core/fileutil.cpp |   13 ++++++-------
+ 1 files changed, 6 insertions(+), 7 deletions(-)
+
+commit 0cce25f9e168b19731ecd154c932676b88b1bbde
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Sep 7 15:04:39 2010 -0700
+
+    fix XCode and MSVC project files for new core/fileutil files
+
+ src/pbrt.vcproj                    |   40 ++++++++++++++++++++++++++++++++++++
+ src/pbrt.xcodeproj/project.pbxproj |    6 +++++
+ 2 files changed, 46 insertions(+), 0 deletions(-)
+
+commit 075aee37d45663da6b3559de992ed28316a2eb1b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Sep 7 15:00:53 2010 -0700
+
+    Small cleanups to new file search path handling code.
+
+ src/SConscript        |    3 +-
+ src/core/fileutil.cpp |  134 ++++++++++++++++++++++++------------------------
+ src/core/fileutil.h   |   10 ++--
+ src/core/paramset.cpp |   18 ++-----
+ src/core/paramset.h   |    3 -
+ src/core/parser.cpp   |    6 ++-
+ src/core/pbrtlex.ll   |    4 +-
+ src/core/pbrtparse.yy |    1 -
+ 8 files changed, 86 insertions(+), 93 deletions(-)
+
+commit 84e34d3d09408789284fb4b8f0765ce9d64865b3
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Tue Sep 7 01:49:37 2010 +0100
+
+    Removed some debugging output from lexer and paramset
+
+ src/core/paramset.cpp |    2 --
+ src/core/pbrtlex.ll   |    6 ------
+ 2 files changed, 0 insertions(+), 8 deletions(-)
+
+commit bcf4c3da02ec54913bc5217121d771e813a97653
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Tue Sep 7 01:14:45 2010 +0100
+
+    Replaced some calls to FindOneString with FindOneFilename
+    
+    Found a few more places where a filename was being retrieved from a paramset and updated them to use the FindOneFilename method.
+
+ src/integrators/useprobes.cpp   |    2 +-
+ src/renderers/createprobes.cpp  |    2 +-
+ src/renderers/surfacepoints.cpp |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 4656f43412759407d5d6b4f8e4d985b285a54d31
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Tue Sep 7 00:59:50 2010 +0100
+
+    Includes are now handled by the parser, not the lexer.
+    
+    Previously the lexer was handling includes so that they were transparent to the parser. This was causing a problem with the handling of relative filenames in any statement immediately preceding an include. The parser has to advance into the included file to find the end of the statement, so by the time it initialises the paramset for the statement the current_file has changed.
+    
+    The fix is to move the include handling out of the lexer and into the parser. Now an include statement is parsed like any other statement and it's semantic action calls include_push. This means that an Include will terminate the preceding statement before we open the included file.
+    
+    The downside is that certain things which worked before won't anymore. You won't be able to Include a statement fragment, so something like this
+    
+    	Shape "trianglemesh" "point P" [ Include(points.txt) ]
+    
+    won't work anymore. I don't know how much of a problem that will be.
+
+ src/core/pbrtlex.ll   |   13 +------------
+ src/core/pbrtparse.yy |   13 ++++++++++---
+ 2 files changed, 11 insertions(+), 15 deletions(-)
+
+commit db06775f1ed7963fa3da1f65d5677b79ae98570b
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Mon Sep 6 23:48:07 2010 +0100
+
+    Trying to get the include mechanism resolving relative files correctly.
+    
+    Doesn't quite work yet.
+
+ src/core/paramset.cpp      |    5 ++++-
+ src/core/pbrtlex.ll        |   14 ++++++++++----
+ src/materials/measured.cpp |    2 +-
+ 3 files changed, 15 insertions(+), 6 deletions(-)
+
+commit d0f1cfbf104f8a8d35fe77d873e9c0b485a2e7cd
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Mon Sep 6 00:59:32 2010 +0100
+
+    Moved filename handling functions into separate file and added Windows versions.
+    
+    The Windows versions are untested. Fingers crossed...
+
+ src/core/paramset.cpp |   33 ++-------------------------------
+ src/core/paramset.h   |    2 +-
+ 2 files changed, 3 insertions(+), 32 deletions(-)
+
+commit fc06c19f4f61eb0496f3fe170d8f59e2e77a2ec1
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Sun Aug 8 22:30:13 2010 +0100
+
+    The ResolveFilename code is broken under Windows, so only compile it conditionally.
+    
+    Added #ifdef PBRT_IS_WINDOWS checks around the code and just revert to the old behaviour if it's true.
+
+ src/core/paramset.cpp |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+commit 782e977ae272da0589c2543887489d65a0325566
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Sun Aug 8 22:13:13 2010 +0100
+
+    Made the parser handle relative filenames better.
+    
+    Filenames are resolved relative to the directory containing the current parser input file.
+    
+    To do this, I made ParamSet instances store the directory that relative filenames should be resolved against. Then I added the ResolveFilename method which does the resolution (with correct handling of absolute filenames); and a FindOneFilename method which looks up a string and calls ResolveFilename on it. I also add a FindFilename method to the TextureParams class, as a convenience.
+    
+    I then modified the classes (some of the texture types, some of the lights) which grab filenames from a ParamSet to use the FindOneFilename/FindFilename function instead of FindString.
+    
+    Limitations:
+    - I don't think this will work for included files yet.
+    - The change won't work on Windows (it uses libgen.h and it looks for '/' at the start of a filename to tell whether it's absolute or not).
+
+ src/core/paramset.cpp      |   35 +++++++++++++++++++++++++++++++++++
+ src/core/paramset.h        |    9 +++++++++
+ src/core/pbrtparse.yy      |    1 +
+ src/lights/goniometric.cpp |    2 +-
+ src/lights/infinite.cpp    |    2 +-
+ src/lights/projection.cpp  |    2 +-
+ src/textures/imagemap.cpp  |    4 ++--
+ 7 files changed, 50 insertions(+), 5 deletions(-)
+
+commit 7acd9712ae05df83aabf1980d0c97eda6f979d46
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Sun Aug 8 22:02:09 2010 +0100
+
+    Fixed the .gitignore entries
+
+ .gitignore |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 4e81dfcc073d74753a5ad2b5dcdbceacaf3b44f8
+Author: Vilya Harvey <vilya.harvey@gmail.com>
+Date:   Sun Aug 8 21:59:52 2010 +0100
+
+    Updated .gitignore to include files and directories generated during the build process.
+
+ .gitignore |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+commit 4b37b45fdd7678f63606572c44454cf9f7abbc69
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Sep 3 16:18:08 2010 -0700
+
+    Added "visualizeobjectids" option to SamplerRenderer:
+    randomly shades each primitive based on a hash of primitive/shape
+    id.  Useful for visualizing tessellations, etc.
+
+ src/core/api.cpp                  |    3 ++-
+ src/renderers/metropolis.cpp      |    2 +-
+ src/renderers/samplerrenderer.cpp |   37 ++++++++++++++++++++++++++++++++++---
+ src/renderers/samplerrenderer.h   |   10 ++++++----
+ 4 files changed, 43 insertions(+), 9 deletions(-)
+
+commit d2204d19c27f087ebda1853baec01b0369abc357
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Aug 31 15:43:14 2010 -0700
+
+    Fixed major error in IGI integrator: need to divide contribution of lights
+    by the number of light paths followed, not the number of virtual point
+    lights. (http://pbrt.org/bugtracker/view.php?id=93).
+
+ src/integrators/igi.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 536620134d5da1b72b58391249d2ba79960b6e50
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Aug 31 15:11:47 2010 -0700
+
+    Fix bug http://github.com/mmp/pbrt-v2/issues/#issue/3
+    When clamping octaves in Turbulence(), need to add in term to
+    account for the non-zero average value of the fabsf(Noise())
+    function for the unincluded octaves.
+
+ src/core/texture.cpp |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 03cbee249a143f50ee16a3943844c9bd5a0c880f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Aug 10 15:49:19 2010 +0200
+
+    fix problem with compiling with gcc 4.5.x
+
+ src/core/progressreporter.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3dbe5075efc1b257d32d3ac8a6ff05d71c0b3e83
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Aug 9 17:52:50 2010 +0200
+
+    Re-do fix from commit d3dbf8a0ac3423a2b5575923e5a91f20e702883a for
+    core/parallel.cpp: don't crash if TasksCleanup() is called without
+    TasksInit() having been called.  (Was inadvertently lost in big merge of
+    WIndows build fixes.)
+
+ src/core/parallel.cpp |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit a72a864b743de8754f2b0a0c044c47001f2ab5d9
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Aug 3 13:25:37 2010 +0200
+
+    Remove FresnelApproxEta() and FresnelApproxK() declarations from core/reflection.h.
+    The definitions of functions are no longer included.  (Implementations are available
+    in materials/shinymetal.cpp if needed.)
+
+ src/core/reflection.h |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit a29808f0b7a89ded63d918eaf09a82099c9e5125
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Aug 3 13:24:47 2010 +0200
+
+    Add ShinyMetalMaterial back to pbrt-v2.
+    We had removed this material, which had been in pbrt-v1; added it back for better backwards-compatibility with existing models.  (In general, the new MetalMaterial is to be preferred for
+    new scenes, since it's more physically realistic.)
+
+ src/SConscript                     |    4 ++-
+ src/core/api.cpp                   |    3 ++
+ src/pbrt.vcproj                    |   40 ++++++++++++++++++++++++++++++++++++
+ src/pbrt.xcodeproj/project.pbxproj |    6 +++++
+ 4 files changed, 52 insertions(+), 1 deletions(-)
+
+commit 3699386563340595573c1c7056996f3a26c4e147
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Aug 3 11:50:36 2010 +0200
+
+    When creating Cameras, check to see if shutter close time is less than shutter open time.
+    If so, issue a warning and swap them.
+
+ src/cameras/environment.cpp  |    5 +++++
+ src/cameras/orthographic.cpp |    5 +++++
+ src/cameras/perspective.cpp  |    7 +++++--
+ 3 files changed, 15 insertions(+), 2 deletions(-)
+
+commit c32e33da767e611517a585ae1a5fc61d8a7ccc18
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Aug 3 11:50:06 2010 +0200
+
+    Fix Distribution1D to be robust to functions that are all-zero.
+
+ src/core/montecarlo.h |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+commit a384eb34e447014f575d35ed4d2465f04a07cd86
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Jul 30 11:43:28 2010 +0200
+
+    MSVC build improvements.
+    - Disable buffer security checks
+    - Enable SSE2 for 32-bit builds. (Already enabled automatically for 64-bit builds.)
+
+ src/pbrt.vcproj |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 1c0f611bfb03c645d9a04108d75fdee8622e68ef
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Jul 30 02:33:09 2010 -0700
+
+    Fix implementations of / operations in CoefficientSpectrum.
+    For s / a, stop computing (1/a) and then s * (1/a), as this was leading to
+    NaN numbers under Windows: when a was a FP denorm number, 1/a was Inf, then
+    denorm * Inf was giving NaN.
+
+ src/core/spectrum.h |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+commit 0b8fa9e5bbc55f76c8bae1157b10b83d8a671019
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jul 28 10:10:17 2010 +0200
+
+    Fix XCode project for Mac builds
+    (stdafx.h file added for Windows precompiled headers needed to be added.)
+
+ src/pbrt.xcodeproj/project.pbxproj |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 885626bc802446f0da8e5489336608ba8cd71b69
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Jul 27 17:29:35 2010 +0200
+
+    Completely updated Windows build, thanks to Zachary Turner
+    (divisortheory@gmail.com).  See the file src/README_BUILDING.txt for
+    updated directions about building pbrt-v2 under Windows.
+    
+    The main changes are:
+    
+    - OpenEXR is provided in source form, with a custom solution file
+    (src/windows/3rdparty/3rdparty.sln) for building the libraries
+    - The pbrt solution file has been updated to use those built OpenEXR
+    libraries.
+    - The Windows build uses precompiled headers now.
+
+ README.txt                           |   14 +-
+ src/README_BUILDING.txt              |   90 +-
+ src/accelerators/bvh.cpp             |    1 +
+ src/accelerators/bvh.h               |    4 +
+ src/accelerators/grid.cpp            |    1 +
+ src/accelerators/grid.h              |    4 +
+ src/accelerators/kdtreeaccel.cpp     |    1 +
+ src/accelerators/kdtreeaccel.h       |    4 +
+ src/cameras/environment.cpp          |    1 +
+ src/cameras/environment.h            |    4 +
+ src/cameras/orthographic.cpp         |    1 +
+ src/cameras/orthographic.h           |    4 +
+ src/cameras/perspective.cpp          |    1 +
+ src/cameras/perspective.h            |    4 +
+ src/core/api.cpp                     |    1 +
+ src/core/api.h                       |    4 +
+ src/core/camera.cpp                  |    2 +-
+ src/core/camera.h                    |    4 +
+ src/core/diffgeom.cpp                |    1 +
+ src/core/diffgeom.h                  |    4 +
+ src/core/error.cpp                   |    8 +-
+ src/core/error.h                     |    4 +
+ src/core/film.cpp                    |    1 +
+ src/core/film.h                      |    4 +
+ src/core/filter.cpp                  |    1 +
+ src/core/filter.h                    |    4 +
+ src/core/floatfile.cpp               |    1 +
+ src/core/floatfile.h                 |    4 +
+ src/core/geometry.cpp                |    1 +
+ src/core/geometry.h                  |    4 +
+ src/core/imageio.cpp                 |    7 +-
+ src/core/imageio.h                   |    4 +
+ src/core/integrator.cpp              |    1 +
+ src/core/integrator.h                |    4 +
+ src/core/intersection.cpp            |    1 +
+ src/core/intersection.h              |    4 +
+ src/core/kdtree.h                    |    4 +
+ src/core/light.cpp                   |    1 +
+ src/core/light.h                     |    4 +
+ src/core/material.cpp                |    1 +
+ src/core/material.h                  |    4 +
+ src/core/memory.cpp                  |    5 +-
+ src/core/memory.h                    |    4 +
+ src/core/mipmap.h                    |    4 +
+ src/core/montecarlo.cpp              |    1 +
+ src/core/montecarlo.h                |    6 +-
+ src/core/octree.h                    |    4 +
+ src/core/parallel.cpp                |  129 +-
+ src/core/parallel.h                  |   66 +-
+ src/core/paramset.cpp                |    1 +
+ src/core/paramset.h                  |    4 +
+ src/core/parser.cpp                  |    3 +-
+ src/core/parser.h                    |    4 +
+ src/core/pbrt.h                      |   24 +-
+ src/core/pbrtlex.ll                  |    2 +-
+ src/core/pbrtparse.yy                |    4 +-
+ src/core/primitive.cpp               |    1 +
+ src/core/primitive.h                 |    4 +
+ src/core/probes.cpp                  |    5 +-
+ src/core/probes.h                    |    4 +
+ src/core/progressreporter.cpp        |    9 +-
+ src/core/progressreporter.h          |    4 +
+ src/core/quaternion.cpp              |    1 +
+ src/core/quaternion.h                |    4 +
+ src/core/reflection.cpp              |    1 +
+ src/core/reflection.h                |    4 +
+ src/core/renderer.cpp                |    1 +
+ src/core/renderer.h                  |    4 +
+ src/core/rng.cpp                     |    1 +
+ src/core/rng.h                       |    4 +
+ src/core/sampler.cpp                 |    2 +-
+ src/core/sampler.h                   |    4 +
+ src/core/scene.cpp                   |    1 +
+ src/core/scene.h                     |    4 +
+ src/core/sh.cpp                      |    1 +
+ src/core/sh.h                        |    4 +
+ src/core/shape.cpp                   |    1 +
+ src/core/shape.h                     |    4 +
+ src/core/shrots.cpp                  |    1 +
+ src/core/spectrum.cpp                |    1 +
+ src/core/spectrum.h                  |    4 +
+ src/core/texture.cpp                 |    1 +
+ src/core/texture.h                   |    4 +
+ src/core/timer.cpp                   |    5 +-
+ src/core/timer.h                     |    8 +-
+ src/core/transform.cpp               |    1 +
+ src/core/transform.h                 |    4 +
+ src/core/volume.cpp                  |    1 +
+ src/core/volume.h                    |    4 +
+ src/film/image.cpp                   |    1 +
+ src/film/image.h                     |    4 +
+ src/filters/box.cpp                  |    1 +
+ src/filters/box.h                    |    4 +
+ src/filters/gaussian.cpp             |    1 +
+ src/filters/gaussian.h               |    4 +
+ src/filters/mitchell.cpp             |    1 +
+ src/filters/mitchell.h               |    4 +
+ src/filters/sinc.cpp                 |    1 +
+ src/filters/sinc.h                   |    4 +
+ src/filters/triangle.cpp             |    1 +
+ src/filters/triangle.h               |    4 +
+ src/integrators/ambientocclusion.cpp |    1 +
+ src/integrators/ambientocclusion.h   |    4 +
+ src/integrators/diffuseprt.cpp       |    1 +
+ src/integrators/diffuseprt.h         |    4 +
+ src/integrators/dipolesubsurface.cpp |    1 +
+ src/integrators/dipolesubsurface.h   |    4 +
+ src/integrators/directlighting.cpp   |    1 +
+ src/integrators/directlighting.h     |    4 +
+ src/integrators/emission.cpp         |    1 +
+ src/integrators/emission.h           |    4 +
+ src/integrators/glossyprt.cpp        |    1 +
+ src/integrators/glossyprt.h          |    4 +
+ src/integrators/igi.cpp              |    1 +
+ src/integrators/igi.h                |    4 +
+ src/integrators/irradiancecache.cpp  |    1 +
+ src/integrators/irradiancecache.h    |    4 +
+ src/integrators/path.cpp             |    1 +
+ src/integrators/path.h               |    4 +
+ src/integrators/photonmap.cpp        |    1 +
+ src/integrators/photonmap.h          |    4 +
+ src/integrators/single.cpp           |    1 +
+ src/integrators/single.h             |    4 +
+ src/integrators/useprobes.cpp        |    1 +
+ src/integrators/useprobes.h          |    4 +
+ src/integrators/whitted.cpp          |    1 +
+ src/integrators/whitted.h            |    4 +
+ src/lights/diffuse.cpp               |    1 +
+ src/lights/diffuse.h                 |    4 +
+ src/lights/distant.cpp               |    1 +
+ src/lights/distant.h                 |    4 +
+ src/lights/goniometric.cpp           |    1 +
+ src/lights/goniometric.h             |    4 +
+ src/lights/infinite.cpp              |    1 +
+ src/lights/infinite.h                |    4 +
+ src/lights/point.cpp                 |    1 +
+ src/lights/point.h                   |    4 +
+ src/lights/projection.cpp            |    1 +
+ src/lights/projection.h              |    4 +
+ src/lights/spot.cpp                  |    1 +
+ src/lights/spot.h                    |    4 +
+ src/main/pbrt.cpp                    |    2 +-
+ src/materials/glass.cpp              |    1 +
+ src/materials/glass.h                |    4 +
+ src/materials/kdsubsurface.cpp       |    1 +
+ src/materials/kdsubsurface.h         |    4 +
+ src/materials/matte.cpp              |    1 +
+ src/materials/matte.h                |    4 +
+ src/materials/measured.cpp           |    1 +
+ src/materials/measured.h             |    4 +
+ src/materials/metal.cpp              |    1 +
+ src/materials/metal.h                |    4 +
+ src/materials/mirror.cpp             |    1 +
+ src/materials/mirror.h               |    4 +
+ src/materials/mixmat.cpp             |    1 +
+ src/materials/mixmat.h               |    4 +
+ src/materials/plastic.cpp            |    1 +
+ src/materials/plastic.h              |    4 +
+ src/materials/substrate.cpp          |    1 +
+ src/materials/substrate.h            |    4 +
+ src/materials/subsurface.cpp         |    1 +
+ src/materials/subsurface.h           |    4 +
+ src/materials/translucent.cpp        |    1 +
+ src/materials/translucent.h          |    4 +
+ src/materials/uber.cpp               |    1 +
+ src/materials/uber.h                 |    4 +
+ src/pbrt.vcproj                      | 3945 +++++++++++++++++++++++++++++++++-
+ src/renderers/aggregatetest.cpp      |    1 +
+ src/renderers/aggregatetest.h        |    4 +
+ src/renderers/createprobes.cpp       |    1 +
+ src/renderers/createprobes.h         |    4 +
+ src/renderers/metropolis.cpp         |    1 +
+ src/renderers/metropolis.h           |    4 +
+ src/renderers/samplerrenderer.cpp    |    1 +
+ src/renderers/samplerrenderer.h      |    4 +
+ src/renderers/surfacepoints.cpp      |    1 +
+ src/renderers/surfacepoints.h        |    4 +
+ src/samplers/adaptive.cpp            |    1 +
+ src/samplers/adaptive.h              |    4 +
+ src/samplers/bestcandidate.cpp       |    1 +
+ src/samplers/bestcandidate.h         |    4 +
+ src/samplers/halton.cpp              |    1 +
+ src/samplers/halton.h                |    4 +
+ src/samplers/lowdiscrepancy.cpp      |    1 +
+ src/samplers/lowdiscrepancy.h        |    4 +
+ src/samplers/random.cpp              |    1 +
+ src/samplers/random.h                |    4 +
+ src/samplers/stratified.cpp          |    1 +
+ src/samplers/stratified.h            |    4 +
+ src/shapes/cone.cpp                  |    1 +
+ src/shapes/cone.h                    |    4 +
+ src/shapes/cylinder.cpp              |    1 +
+ src/shapes/cylinder.h                |    4 +
+ src/shapes/disk.cpp                  |    1 +
+ src/shapes/disk.h                    |    4 +
+ src/shapes/heightfield.cpp           |    1 +
+ src/shapes/heightfield.h             |    4 +
+ src/shapes/hyperboloid.cpp           |    1 +
+ src/shapes/hyperboloid.h             |    4 +
+ src/shapes/loopsubdiv.cpp            |    1 +
+ src/shapes/loopsubdiv.h              |    4 +
+ src/shapes/nurbs.cpp                 |    1 +
+ src/shapes/nurbs.h                   |    4 +
+ src/shapes/paraboloid.cpp            |    1 +
+ src/shapes/paraboloid.h              |    4 +
+ src/shapes/sphere.cpp                |    1 +
+ src/shapes/sphere.h                  |    4 +
+ src/shapes/trianglemesh.cpp          |    1 +
+ src/shapes/trianglemesh.h            |    4 +
+ src/textures/bilerp.cpp              |    1 +
+ src/textures/bilerp.h                |    4 +
+ src/textures/checkerboard.cpp        |    1 +
+ src/textures/checkerboard.h          |    4 +
+ src/textures/constant.cpp            |    1 +
+ src/textures/constant.h              |    4 +
+ src/textures/dots.cpp                |    1 +
+ src/textures/dots.h                  |    4 +
+ src/textures/fbm.cpp                 |    1 +
+ src/textures/fbm.h                   |    4 +
+ src/textures/imagemap.cpp            |    1 +
+ src/textures/imagemap.h              |    4 +
+ src/textures/marble.cpp              |    1 +
+ src/textures/marble.h                |    4 +
+ src/textures/mix.cpp                 |    1 +
+ src/textures/mix.h                   |    4 +
+ src/textures/scale.cpp               |    1 +
+ src/textures/scale.h                 |    4 +
+ src/textures/uv.cpp                  |    1 +
+ src/textures/uv.h                    |    4 +
+ src/textures/windy.cpp               |    1 +
+ src/textures/windy.h                 |    4 +
+ src/textures/wrinkled.cpp            |    1 +
+ src/textures/wrinkled.h              |    4 +
+ src/volumes/exponential.cpp          |    1 +
+ src/volumes/exponential.h            |    4 +
+ src/volumes/homogeneous.cpp          |    1 +
+ src/volumes/homogeneous.h            |    4 +
+ src/volumes/volumegrid.cpp           |    1 +
+ src/volumes/volumegrid.h             |    4 +
+ 239 files changed, 4681 insertions(+), 216 deletions(-)
+
+commit cfd16af882636419c8187e5391a4ae1d7579edf1
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jun 14 14:04:37 2010 -0700
+
+    Fix crash in ProjectionLight::Power() when image didn't load successfully.
+
+ src/lights/projection.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit bddbe32a337ad8340bc14a02db0c5e956a142034
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Jun 12 14:13:50 2010 -0700
+
+    Fix seg fault in ProjectionLight in case where image isn't read
+    successfully.
+
+ src/lights/projection.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8875a6626afc0c0b0974465efc3eabd00a6ef9f4
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jun 9 16:05:16 2010 -0700
+
+    Fix computation of radiance/IOR scale factor for specular transmission
+    (Volodymyr Kachurovskyi).
+
+ src/core/reflection.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d11135164ee959d390edfed7ef010081e6829740
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jun 9 16:04:36 2010 -0700
+
+    Fix AggregateVolume::p() computation: weight individual volumes based on
+    sigma_s, not their individual albedos. (Volodymyr Kachurovskyi)
+
+ src/core/volume.cpp |    9 +++------
+ 1 files changed, 3 insertions(+), 6 deletions(-)
+
+commit d3dbf8a0ac3423a2b5575923e5a91f20e702883a
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jun 9 12:31:43 2010 -0700
+
+    Fix TasksCleanup() so that it doesn't crash if called when TasksInit() hasn't been called.
+
+ src/core/parallel.cpp |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 55226c9db50e3ab6b78a75c25b03fcd121a3a4ee
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Jun 4 17:11:07 2010 -0700
+
+    Fix memory leak in TransformCache::Clear()
+    Add new probe to track transform cache hits rate, updated dtrace script to
+      print this value.
+
+ dtrace/basic.d    |    6 ++++++
+ src/core/api.cpp  |    5 ++++-
+ src/core/dtrace.d |    1 +
+ src/core/probes.h |    2 ++
+ 4 files changed, 13 insertions(+), 1 deletions(-)
+
+commit 541d0afe3c149511463dad69f0b1006e21b28b74
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed May 19 19:15:57 2010 -0700
+
+    Reorganize source code directories to reflect the directory structure the
+    book describes.
+
+ README.txt |   24 ++++++++++++++++++++++--
+ 1 files changed, 22 insertions(+), 2 deletions(-)
+
+commit 6f7efc9418a481d77a9b3665148f3be0adb59384
+Author: Matthew Pharr <mmp@Matthew-Pharrs-iMac.local>
+Date:   Thu May 13 13:46:56 2010 -0700
+
+    Disable grand central dispatch on macs: it launches way too many threads,
+    leading to unnecessary contention on things like the irradiance cache
+    reader-writer lock and thence a substantial performance degradation.
+
+ SConstruct |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit c36868dc05045cd6da22a042960dde58f9fa3adb
+Author: Matthew Pharr <mmp@Matthew-Pharrs-iMac.local>
+Date:   Mon May 10 17:22:16 2010 -0700
+
+    Clear out photon arrays when photon shooting fails.
+    (Avoids very slow renderings in this case, due to an enourmous number of
+    generally useless radiance photons sitting around.)
+
+ integrators/photonmap.cpp |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 5b03b3009ae9c66d5ed7aa202091997510a2a757
+Author: Matthew Pharr <mmp@Matthew-Pharrs-iMac.local>
+Date:   Thu Apr 29 16:10:45 2010 -0700
+
+    small Makefile fixes
+
+ Makefile |   22 ++++++++++++++--------
+ 1 files changed, 14 insertions(+), 8 deletions(-)
+
+commit 969c344bb3c5d4a24d8e88c3925e38cfe5f3309e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Apr 29 15:56:27 2010 -0700
+
+    go back to duplicating files into variant dir in SCons build
+
+ SConstruct |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 2fa8a9c117a5348dd5fda1d3b91e9237c4c90a55
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Apr 29 09:37:39 2010 -0700
+
+    Fix small MC sampling bugs that led to NaNs in rare cases when the PDF being sampled was zero in some buckets (and thus the CDF values at the edges of each bucket were the same).
+    
+    In particular, it was happening that sometimes a sample value of u=0 would be passed into the sampling routines when the CDF array had values like {0, 0, 0, .1, .2, ... }.  The old code would pick the first bucket, from [0,0], and then compute a NaN value for the du offset (0/(0-0) == NaN).  The new code instead picks the bucket [0,.1] instead and all the math works out as desired.
+
+ core/montecarlo.h   |    9 +++++++--
+ lights/infinite.cpp |    2 ++
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+commit 75ed1da0e408d671cbcb372260afa156aab24fea
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Apr 29 09:34:41 2010 -0700
+
+    Mac XCode build fixes:
+    - remove references to "distantinfinite" light files
+    - add dtrace target
+    - add NDEBUG preprocessor #define to release and dtrace build targets
+
+ pbrt.xcodeproj/project.pbxproj |   42 ++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 38 insertions(+), 4 deletions(-)
+
+commit 45383cf6872ada787705af6a77517af4139c180f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Apr 28 20:09:52 2010 -0700
+
+    scons build change: don't make temporary file copies in variant build directory
+
+ SConstruct |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 05bdc609ab0ef3e38b8811323d91e0833ddb27a8
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Apr 28 20:09:28 2010 -0700
+
+    Rewrite error message printing routines to nicely format the output based on the number of columns in the output window.
+
+ core/error.cpp |   30 ++++++++++++++++++++++++++++--
+ 1 files changed, 28 insertions(+), 2 deletions(-)
+
+commit 86fda0cb4eedb4891ddca78d4976fd5cdbea24ad
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Apr 28 20:08:59 2010 -0700
+
+    Fix MSVC build, where hexadecimal floating-point constants aren't supported.
+
+ core/montecarlo.h |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 948ac242afb3ae3e70b39750917582548d1b37b9
+Author: Matthew Pharr <mmp@Matthew-Pharrs-iMac.local>
+Date:   Tue Apr 27 10:42:39 2010 -0700
+
+    Use double precision for intermediate values in cross product calculation;
+    fixes problems with catastrophic floating-point cancellation in rare cases.
+
+ core/geometry.h |   24 +++++++++++++++---------
+ 1 files changed, 15 insertions(+), 9 deletions(-)
+
+commit 00eccbae18bd2ba8cd979fa0f1e7257d03222286
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 27 06:48:30 2010 -0700
+
+    Fix rare NaN case in infinite light sampling code.
+
+ lights/infinite.cpp |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit ed481cd3fa69872dff06ec20ce7ca28622a2984f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 27 06:48:07 2010 -0700
+
+    Clamp sample values in a number of cases to ensure that random samples with value
+    1.0 are never generated.  (A number of places in the code assume that they are
+    in the range [0,1).)
+
+ core/montecarlo.cpp |    9 +++++----
+ core/montecarlo.h   |   13 +++++++++----
+ 2 files changed, 14 insertions(+), 8 deletions(-)
+
+commit 020554ffac3b252ee5a626fe758c19c0effbdd1e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 27 05:52:58 2010 -0700
+
+    Optionally return integer offset from Distribution1D::SampleContinuous();
+    previously, we'd sometimes essentially compute a [0,1] sample as ((i + u) /
+    count), return that, then convert that back to an integer offset as
+    int((i + u) / count) * count), which in turn would give a different i value
+    than before when u was close to .99999.  (This in turn lead to NaN values
+    when doing environment map sampling in rare cases).
+
+ core/montecarlo.h |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 21dd5834086469869d6b500fb7fbcd5c4d55690e
+Author: Matthew Pharr <mmp@Matthew-Pharrs-iMac.local>
+Date:   Sun Apr 25 10:29:14 2010 -0700
+
+    Cosmetic code changes from generating code from ~final TeX files for book.  (Spelling fixes, indentation, etc.)
+    Should be no functional differences.
+
+ accelerators/bvh.cpp             |    8 +++++---
+ accelerators/kdtreeaccel.cpp     |    1 +
+ core/api.cpp                     |   11 ++++++-----
+ core/kdtree.h                    |    3 +--
+ core/montecarlo.h                |    7 ++++---
+ core/octree.h                    |    1 +
+ core/pbrt.h                      |    4 +++-
+ core/probes.h                    |    2 +-
+ core/reflection.cpp              |    2 +-
+ core/reflection.h                |    1 +
+ core/sh.cpp                      |    1 +
+ core/sh.h                        |    2 +-
+ film/image.cpp                   |    3 ++-
+ integrators/dipolesubsurface.cpp |    2 +-
+ integrators/glossyprt.cpp        |    2 +-
+ integrators/igi.cpp              |    3 +++
+ integrators/irradiancecache.cpp  |    2 ++
+ integrators/photonmap.cpp        |    6 +++---
+ integrators/single.cpp           |    1 +
+ integrators/useprobes.cpp        |    4 ++--
+ lights/distant.cpp               |    1 +
+ lights/goniometric.cpp           |    1 -
+ lights/goniometric.h             |    1 -
+ lights/infinite.cpp              |    4 ++--
+ renderers/createprobes.cpp       |    4 ++--
+ renderers/metropolis.cpp         |    4 ++++
+ renderers/samplerrenderer.cpp    |   12 ++++++------
+ renderers/surfacepoints.h        |    1 +
+ samplers/adaptive.cpp            |    1 +
+ samplers/bestcandidate.cpp       |    6 +++---
+ samplers/lowdiscrepancy.cpp      |    3 +--
+ shapes/loopsubdiv.cpp            |    3 +--
+ shapes/trianglemesh.cpp          |    3 +++
+ shapes/trianglemesh.h            |    2 +-
+ tools/bsdftest.cpp               |   28 ++++++++++++++--------------
+ 35 files changed, 81 insertions(+), 59 deletions(-)
+
+commit 18b751736ea39ebb60f758ae84c3a1d224797575
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 20 22:31:33 2010 -0700
+
+    Added support for dtrace in Makefile
+
+ Makefile |   17 ++++++++++++++++-
+ 1 files changed, 16 insertions(+), 1 deletions(-)
+
+commit 7fc7412c7678692a8eab1e9b5b5b5c7f1de66ab0
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Apr 19 17:36:51 2010 -0700
+
+    Big cleanup of the build system, significant rewrite of the README files.
+
+ Makefile            |   53 +++++++++-------
+ README.txt          |   66 +++++++++-----------
+ README_BUILDING.txt |  121 +++++++++++++++++++++++++-----------
+ SConscript          |  171 ++++++++++++++++-----------------------------------
+ SConstruct          |  117 +++++++++++++++++------------------
+ 5 files changed, 253 insertions(+), 275 deletions(-)
+
+commit 2934c6f236aa5957809edc2864bbc65e6c56d545
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Apr 19 14:15:47 2010 -0700
+
+    Fix silly bug in new "halffov" parameter to PerspectiveCamera.
+
+ cameras/perspective.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 86698e042492e5b4bc727a16ef10841167a2ca17
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Apr 19 13:23:52 2010 -0700
+
+    Fix windows build
+
+ core/progressreporter.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4101e336eebc4e42ba7110462a6534474dc75b0f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Apr 18 16:05:19 2010 -0700
+
+    Add StructureSynth exporter template (http://structuresynth.sourceforge.net/).
+    Add "halffov" parameter to perspective camera (for use by the StructureSynth exporter script).
+
+ cameras/perspective.cpp |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit ad5a07652e50a4a85a313527277501dfabc3fde2
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Apr 18 13:40:01 2010 -0700
+
+    Only do Info() call for redefined textures, not Warning()
+
+ core/api.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit adac1f7665dae959b519ee95dc44b2bdfe088fd6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Apr 18 06:46:14 2010 -0700
+
+    Only warn about no lights being defined when using a Renderer that uses lights.
+    (i.e. it doesn't matter if no lights are defined for the ambient occlusion renderer, etc...)
+
+ core/api.cpp   |   12 ++++++++++++
+ core/scene.cpp |    3 ---
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
+commit 599e8a7c2834fe08c10caf4e50e3682eef450b05
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Apr 18 06:39:19 2010 -0700
+
+    Revert to having etai/etat scale commented out in SpecularTransmission.
+
+ core/reflection.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4935c2cf67cd762f0cae7de8ac7b39013f54e1c5
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Apr 18 06:37:29 2010 -0700
+
+    Fix various bugs in loading measured BRDF files from disk in cases where the file wasn't found.
+    (It no longer crashes in this case.)
+
+ materials/measured.cpp |   18 ++++++++++++++----
+ 1 files changed, 14 insertions(+), 4 deletions(-)
+
+commit a3a86d8f5c5edc87566189445385ae78e2f3b7f3
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Apr 18 06:36:55 2010 -0700
+
+    Fix subtle bug in volume integrators that very rarely led to NaNs.
+    (In short, just because a<b, it isn't necessarily true that b-a > 0.)
+
+ integrators/emission.cpp |    2 +-
+ integrators/single.cpp   |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit b26666aa8aa1845de0d1b457cbc584cd3f94b49f
+Author: Matthew Pharr <mmp@Matthew-Pharrs-iMac.local>
+Date:   Thu Apr 15 17:10:44 2010 -0700
+
+    Remove PBRT_HAS_PTHREADS, PBRT_POINTER_SIZE, and PBRT_HAS_64_BIT_ATOMICS #defines; instead detect automatically based on pre-#defined values from the compiler being used.
+
+ Makefile            |    4 +--
+ README.txt          |    2 +-
+ README_BUILDING.txt |   52 +++++++++++++++++++------------------
+ SConstruct          |    6 +---
+ core/parallel.cpp   |   71 ++++++++++++++++++++++++--------------------------
+ core/parallel.h     |   28 +++++++++-----------
+ core/pbrt.h         |   12 ++++++++
+ core/reflection.cpp |    2 +-
+ pbrt.vcproj         |    8 +++---
+ 9 files changed, 94 insertions(+), 91 deletions(-)
+
+commit 0fb2658ed5fd717630c6613c65fe7a9bfdf226e6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 13 09:45:29 2010 -0700
+
+    Rename PBRT_STATS_* to PBRT_PROBES_*
+
+ Makefile            |    2 +-
+ README_BUILDING.txt |    8 ++++----
+ SConstruct          |   12 ++++++------
+ core/error.cpp      |   24 ++++++++++--------------
+ core/probes.cpp     |    4 ++--
+ core/probes.h       |   12 ++++++------
+ pbrt.vcproj         |    8 ++++----
+ 7 files changed, 33 insertions(+), 37 deletions(-)
+
+commit 5cd120e908901fe6d3c5f174034ba506503d57c2
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 13 09:44:56 2010 -0700
+
+    Get actual terminal width to size ProgressReporter bars.
+
+ core/progressreporter.cpp |   33 ++++++++++++++++++++++++++++++++-
+ core/progressreporter.h   |    7 ++++---
+ 2 files changed, 36 insertions(+), 4 deletions(-)
+
+commit c0f8478e5d0c6c4ec820a0be738f5499e25b0ee8
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 13 09:44:25 2010 -0700
+
+    Rename Metal -> MetalMaterial (consistency)
+
+ materials/metal.cpp |   10 +++++-----
+ materials/metal.h   |   12 ++++++------
+ 2 files changed, 11 insertions(+), 11 deletions(-)
+
+commit f51d0472f84612d7e3060f9827391a7367ec638c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 6 12:23:40 2010 -0700
+
+    Fix exrdiff pixel difference condition.
+
+ tools/exrdiff.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 2ada6bff00079d006715be7ad385fca65b456f5e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 6 12:22:42 2010 -0700
+
+    Set *sampledType in BSDF::Sample_f() even when sampling fails, to fix valgrind warning.
+
+ core/reflection.cpp |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit a75e4034bb448326fb8dfb0090784b090d58dbc0
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 6 12:22:14 2010 -0700
+
+    Gracefully handle cases with microfacet BSDFs where wo=-wi.
+
+ core/reflection.cpp |   12 +++++++++---
+ 1 files changed, 9 insertions(+), 3 deletions(-)
+
+commit f412d7daf0abbef0babe4b58c3168d52e882fdde
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Apr 6 12:21:20 2010 -0700
+
+    Fix small memory leak.
+
+ renderers/metropolis.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 47974fb15a7fe4d0097a002e0217a6ee4db539ad
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Apr 4 17:09:27 2010 -0700
+
+    Fix bug in SpectrumSamplesSorted() (Sebastian Mach / phresnel(.org))
+
+ core/spectrum.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7700fb18e4acbbd6e715903028342e34718dbfe8
+Author: Matthew Pharr <mmp@Matthew-Pharrs-iMac.local>
+Date:   Sun Apr 4 15:12:01 2010 -0700
+
+    Be robust to unusual (but possible) case of (wi+wo)==Vector(0,0,0) in various halfangle BRDF code.
+
+ core/reflection.cpp |   12 +++++++++---
+ 1 files changed, 9 insertions(+), 3 deletions(-)
+
+commit 23fd2f8a23f8957ac5f7d4d3dc233d98dd8c92b6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Apr 3 08:41:41 2010 -0700
+
+    One more try at fixing mutate().
+
+ renderers/metropolis.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0745a2ccf3a9a7ebd2d0480567f24a3595e53ca7
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Apr 3 08:25:26 2010 -0700
+
+    Try 2: Fix mutate() to return values in [min, max), not [min, max].
+
+ renderers/metropolis.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit db88316824b2052f43eb942bec0765ac8991d558
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Apr 3 08:09:34 2010 -0700
+
+    Fix mutate() to return values in [min, max), not [min, max].
+
+ renderers/metropolis.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 7248a8c9207e67687e44dae1b407f939c33631bc
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Apr 3 08:06:32 2010 -0700
+
+    Add Assert()s in LightSample and BSDFSample to earlier catch out of range random sample values (generally, those that are == 1.)
+
+ core/light.cpp      |    3 +++
+ core/light.h        |    3 +++
+ core/reflection.cpp |    3 +++
+ core/reflection.h   |    3 +++
+ 4 files changed, 12 insertions(+), 0 deletions(-)
+
+commit 17defc1312f9db9f19cf0175d647cfccbf5ee0f5
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Apr 2 05:38:22 2010 -0700
+
+    Don't crash in WaitForAllTasks() if no tasks were ever enqueued.
+
+ core/parallel.cpp |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit ff7f2682f4884b88bf1fdcd5a02b9cc55d19257d
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Apr 1 19:48:24 2010 -0700
+
+    Modify EXR writing code to put file opening inside try/catch block so that it doesn't (for example) crash with an ugly abort error and no other information when the directory for the output file doesn't exist.
+
+ core/imageio.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 4be64b0cc9fd28a0302c66b68f31ed86f27054ba
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Apr 1 19:47:29 2010 -0700
+
+    Fix spelling of Jiawen Chen's name in comment.
+
+ core/imageio.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0cea023525f1b033ca3d0970ba5bb3fbdf900a47
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Apr 1 19:47:08 2010 -0700
+
+    Fix GoniometricLight::Power() to not crash when MIPMap pointer is NULL.
+
+ lights/goniometric.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ab8b248647cf411a48a34599dc34a2da6339ed91
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Mar 27 21:23:13 2010 -0700
+
+    In DipoleSubsurfaceIntegrator, still create IrradiancePoints if incident irradiance is zero.
+
+ integrators/dipolesubsurface.cpp |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
+commit d60b999edcdc26913cb7683cc22e31d75dafd789
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Mar 27 21:22:44 2010 -0700
+
+    Use aligned allocation for KdTree data items.
+
+ core/kdtree.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 8799fcf7d6970644f5790d91fba8b94986906df8
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Mar 22 10:32:02 2010 -0700
+
+    Fix computation of buckets for parallel rendering to be more square.
+
+ core/sampler.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 9711ad4df6f354d5170d76b264a27f8fe482f800
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Mar 22 10:31:44 2010 -0700
+
+    Fix logic error in kd tree traversal code for case where ray origin is on splitting plane (Greg Johnson).
+
+ accelerators/kdtreeaccel.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d7c600dce563c39507112e2ed6024ab190a6c226
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Mar 22 10:31:23 2010 -0700
+
+    Fix adaptive sampler test for detecting when rays hit different shapes.
+
+ samplers/adaptive.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1eaea1dda6d61f437b0e9e2c903dd73d355a8e10
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Mar 17 06:39:56 2010 -0700
+
+    Don't initialize tasksRunningCondition and workerSemaphore for task system
+      until TasksInit() is called (i.e. not at program startup time with static
+      variable constructors).  Seems to fix mysterious sporadic failures in Mac
+      OS X when running system via python script.
+
+ core/parallel.cpp |   34 +++++++++++++++++++++-------------
+ 1 files changed, 21 insertions(+), 13 deletions(-)
+
+commit 2b81be8c39a5278b06a580e3b1b8db87e62e2e4a
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Mar 12 13:38:58 2010 -0800
+
+    Bump version number to 2.0.0.
+
+ core/pbrt.h |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 6e63cf0dc8d4c219464cc845f4d75e914126d5ca
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Mar 12 13:38:49 2010 -0800
+
+    Fix bug in code for point light projection to SH coefficients.
+
+ lights/point.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7937e561afe9fa19452d7b9b50f366296da092a5
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Mar 12 13:38:18 2010 -0800
+
+    Formatting/spacing fixes.
+
+ core/kdtree.h     |    2 +-
+ core/octree.h     |   10 +++++-----
+ core/parallel.h   |    2 +-
+ core/paramset.cpp |    4 ++--
+ core/sh.cpp       |    4 ++--
+ 5 files changed, 11 insertions(+), 11 deletions(-)
+
+commit ba174ee33c1576466e8699163b5e5713098a1638
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Mar 2 17:45:19 2010 -0800
+
+    try to improve robustness of endian-ness detection at compile time
+
+ core/imageio.cpp |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit b86b9f2eaa9d7ee39026cb66e9d38243f2a574e7
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Feb 26 05:49:46 2010 -0800
+
+    small formatting changes
+
+ lights/goniometric.h  |    2 +-
+ lights/projection.cpp |    3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 2b51b589586def24104693c6d1eacb1d0ec59d74
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Feb 23 09:36:04 2010 -0800
+
+    Small formatting fixes.
+
+ core/volume.h           |    4 ++--
+ textures/checkerboard.h |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit a774c26ced62475934405e873100ead6771d406f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Feb 23 09:35:47 2010 -0800
+
+    Bug fix: distant and goniometric lights weren't setting *Ns in the Light::Sample_L() method that samples a ray leaving the light.
+
+ lights/distant.cpp     |    1 +
+ lights/goniometric.cpp |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
+
+commit dfabac655d549f4b454f082c100fb0814f8c79cf
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Feb 23 09:35:24 2010 -0800
+
+    Fix typo in some of the area light sampling probes.
+
+ core/dtrace.d       |    8 ++++----
+ core/probes.h       |   16 ++++++++--------
+ lights/diffuse.cpp  |    8 ++++----
+ lights/infinite.cpp |    8 ++++----
+ 4 files changed, 20 insertions(+), 20 deletions(-)
+
+commit b39982db101b4f4f5c795c421440a5c80ebcc326
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Feb 15 06:40:27 2010 -0800
+
+    Add clamping in two cases where the lack of it could lead to trouble (no bugs yet observed, though).
+    Better error reporting when sem_open fails.
+
+ core/parallel.cpp    |    3 ++-
+ core/reflection.h    |    2 +-
+ materials/mixmat.cpp |    2 +-
+ 3 files changed, 4 insertions(+), 3 deletions(-)
+
+commit 879d4288ee49fe9bca304092e0735729ab88a04f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Feb 15 06:39:49 2010 -0800
+
+    Remove debugging code.
+
+ core/material.cpp |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit 03d9a8bc13d55b51e5cf33a1abad269da99c4682
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Feb 15 06:39:37 2010 -0800
+
+    Tiny formatting changes; no functional differences.
+
+ cameras/perspective.cpp       |    2 +-
+ core/api.cpp                  |    6 +++---
+ core/montecarlo.h             |    5 +++--
+ core/sampler.cpp              |    2 +-
+ core/sh.cpp                   |    4 ++--
+ renderers/samplerrenderer.cpp |    6 +++---
+ samplers/adaptive.cpp         |    4 ++--
+ samplers/stratified.cpp       |    2 +-
+ 8 files changed, 16 insertions(+), 15 deletions(-)
+
+commit 2e799f80f8f55fc0741b85fe44fe8b9fc2c46cca
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Feb 10 17:45:27 2010 +0000
+
+    Tiny code cleanups.
+
+ core/integrator.cpp             |    9 +++++----
+ integrators/emission.cpp        |    2 +-
+ integrators/igi.cpp             |    4 +---
+ integrators/irradiancecache.cpp |    2 +-
+ integrators/photonmap.cpp       |    4 ++--
+ integrators/single.cpp          |    3 ++-
+ renderers/metropolis.cpp        |   12 ++++++------
+ shapes/trianglemesh.cpp         |    4 ++--
+ 8 files changed, 20 insertions(+), 20 deletions(-)
+
+commit 48f7bc5b69d020f9e9a9ffe6b48e09944b8883d7
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Jan 29 17:04:54 2010 -0800
+
+    Minor formatting changes, variable renaming.
+
+ accelerators/bvh.cpp    |    8 ++++----
+ accelerators/grid.h     |    2 +-
+ core/spectrum.h         |    2 +-
+ shapes/trianglemesh.cpp |    8 ++++----
+ 4 files changed, 10 insertions(+), 10 deletions(-)
+
+commit 3e8c8b949f1795109e4755f758b68c78c935f800
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Jan 26 21:28:38 2010 -0800
+
+    Fix SAH computation in BVH construction.
+
+ accelerators/bvh.cpp |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit c97b6bb35e72413813a46debec24aef599e101e4
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Jan 26 21:28:28 2010 -0800
+
+    BVH: actually use the precomputed primitive BBoxes when building tree rather than repeatedly calling WorldBound()
+
+ accelerators/bvh.cpp |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
+
+commit 2738b95d20579fdc0b27c737982d3a4deb5a8792
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Jan 26 21:27:55 2010 -0800
+
+    Remove max depth parameter from IGI integrator.
+    Update default values for various material reflectances so they are more likely to be energy conserving (fixes previous IGI shooting infinite loops)
+
+ integrators/igi.cpp       |    3 +--
+ integrators/igi.h         |    3 +--
+ materials/matte.cpp       |    2 +-
+ materials/mirror.cpp      |    2 +-
+ materials/plastic.cpp     |    4 ++--
+ materials/translucent.cpp |    4 ++--
+ materials/uber.cpp        |    4 ++--
+ 7 files changed, 10 insertions(+), 12 deletions(-)
+
+commit 254d83290f32b6be3e9cdb4170ba62df1d64d39d
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Jan 26 21:27:00 2010 -0800
+
+    Add diff tolerance parameter to exrdiff
+
+ tools/exrdiff.cpp |   35 +++++++++++++++++++++--------------
+ 1 files changed, 21 insertions(+), 14 deletions(-)
+
+commit 3dab1697edc803fe45655e272eaa8a646489bca1
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Jan 26 21:26:45 2010 -0800
+
+    Add PFM file i/o support (courtesy Jiawan Kevin Chen)
+
+ core/imageio.cpp |  215 +++++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 205 insertions(+), 10 deletions(-)
+
+commit 7d239db977eeabaa1972b84e8549a6df02148916
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Jan 21 14:19:02 2010 -0800
+
+    Added a bunch of new probes
+
+ core/dtrace.d            |   45 ++++++++++++++++++++++++-
+ core/mipmap.h            |    9 ++++-
+ core/probes.cpp          |    2 +-
+ core/probes.h            |   82 +++++++++++++++++++++++++++++++++++++++++++++-
+ core/reflection.cpp      |   16 ++++++++-
+ core/rng.cpp             |    7 +++-
+ core/rng.h               |    1 +
+ lights/diffuse.cpp       |   10 ++++-
+ lights/infinite.cpp      |   15 +++++++--
+ renderers/metropolis.cpp |   37 ++++++++++++++++++++-
+ 10 files changed, 209 insertions(+), 15 deletions(-)
+
+commit c14a0df56a462e9bf5ec806d330230552852ee71
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jan 20 17:12:43 2010 -0800
+
+    Added check for NaN values in ImageFilm::Splat()
+
+ film/image.cpp |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 839b4691051e8a425bfd09a4dd1450a356e269bc
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jan 18 17:06:17 2010 -0800
+
+    SuSE build fix (Viznut <riddikulus@verizon.net>)
+
+ core/pbrt.h |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 9aa6419d2d05db4a1d0c61766936e05c6b9408b8
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Jan 17 14:32:00 2010 -0800
+
+    Added Reinhard's simple tone mapping operator and a simple bloom filter to exrtotiff.cpp
+
+ tools/exrtotiff.cpp |  143 ++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 135 insertions(+), 8 deletions(-)
+
+commit 15bc9423b314d7f7bb34effa437ecf0bf64bdc2e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Jan 17 14:31:22 2010 -0800
+
+    Add Assert()s for infinite values when evaluating SH functions; may happen when lmax is > 28 or so.
+    Added a check of lmax's value that should exit with a Severe() error before any of them hit, however.
+
+ core/sh.cpp |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
+commit d63f4069d09098fed7ab8ff6fc4006cc27ec9224
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Jan 17 14:30:39 2010 -0800
+
+    Add check for 0/0 case in Distribution2D::Pdf() that led to NaNs in certain cases.
+
+ core/montecarlo.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 00b6981763e3fe86a110aeebafc37f3037f2418a
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Jan 17 14:29:18 2010 -0800
+
+    Add check in EWA filtering case for zero-length minor ellipse axis: avoid NaNs in that case.
+
+ core/mipmap.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit da6fafdbef32134d0850105a4cd515e2beb6cf95
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Jan 17 14:28:36 2010 -0800
+
+    Minor spacing / formatting changes.
+
+ core/geometry.h                  |    2 +-
+ core/quaternion.cpp              |    4 ++--
+ core/renderer.h                  |    5 +++--
+ core/transform.cpp               |    2 +-
+ integrators/dipolesubsurface.cpp |    6 ++++--
+ integrators/directlighting.cpp   |    6 ++++--
+ integrators/igi.cpp              |    6 ++++--
+ integrators/irradiancecache.cpp  |    6 ++++--
+ integrators/photonmap.cpp        |    6 ++++--
+ integrators/whitted.cpp          |    6 ++++--
+ renderers/samplerrenderer.cpp    |    2 +-
+ 11 files changed, 32 insertions(+), 19 deletions(-)
+
+commit 5dbb0e87891eb86b6a5ebafb288bf7c743f43556
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jan 6 20:26:22 2010 -0800
+
+    Add exrtotiff utility program, also ply2pbrt converter.
+    Wire them up (and tifftoexr, already checked in) in Makefile.
+
+ Makefile |   41 ++++++++++++++++++++++++++++-------------
+ 1 files changed, 28 insertions(+), 13 deletions(-)
+
+commit 697c13733b8c38a0b80a78fbdfce5fab236ff5af
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jan 6 20:25:24 2010 -0800
+
+    Small #include cleanup
+
+ renderers/metropolis.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit aae793089d6e3627dc02ad13b80eb14b148d5976
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jan 6 20:25:10 2010 -0800
+
+    Allow zero for direct pixel samples in MLT renderer: when zero, direct illumination isn't included in the final image.  (Useful for figures.)
+
+ renderers/metropolis.cpp |   36 +++++++++++++++++++-----------------
+ 1 files changed, 19 insertions(+), 17 deletions(-)
+
+commit 6a6568df6e8d335e2b6cd12ac1cb382067cf4554
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jan 6 20:24:28 2010 -0800
+
+    Fix horrifying bug in default value for roughness parameter in glossy prt integrator: now .1, not 10.  (Valid range is (0,1]).
+
+ integrators/glossyprt.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 58f1af558c163eea5d0898c6de9d4db363f4874d
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Jan 6 20:23:58 2010 -0800
+
+    Add verbose (--verbose) option, only print stuff from Info() calls if it's enabled.
+
+ core/error.cpp |    2 ++
+ core/pbrt.h    |    4 ++--
+ main/pbrt.cpp  |    3 ++-
+ 3 files changed, 6 insertions(+), 3 deletions(-)
+
+commit 9d73fe3a75efd4139a7a0ad0454c9b9d96e2e28b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jan 4 06:11:08 2010 -0800
+
+    Bump copyright notices to include 2010.
+
+ accelerators/bvh.cpp             |    2 +-
+ accelerators/bvh.h               |    2 +-
+ accelerators/grid.cpp            |    2 +-
+ accelerators/grid.h              |    2 +-
+ accelerators/kdtreeaccel.cpp     |    2 +-
+ accelerators/kdtreeaccel.h       |    2 +-
+ cameras/environment.cpp          |    2 +-
+ cameras/environment.h            |    2 +-
+ cameras/orthographic.cpp         |    2 +-
+ cameras/orthographic.h           |    2 +-
+ cameras/perspective.cpp          |    2 +-
+ cameras/perspective.h            |    2 +-
+ core/api.cpp                     |    2 +-
+ core/api.h                       |    2 +-
+ core/camera.cpp                  |    2 +-
+ core/camera.h                    |    2 +-
+ core/diffgeom.cpp                |    2 +-
+ core/diffgeom.h                  |    2 +-
+ core/dtrace.d                    |    2 +-
+ core/error.cpp                   |    2 +-
+ core/error.h                     |    2 +-
+ core/film.cpp                    |    2 +-
+ core/film.h                      |    2 +-
+ core/filter.cpp                  |    2 +-
+ core/filter.h                    |    2 +-
+ core/floatfile.cpp               |    2 +-
+ core/floatfile.h                 |    2 +-
+ core/geometry.cpp                |    2 +-
+ core/geometry.h                  |    2 +-
+ core/imageio.cpp                 |    2 +-
+ core/imageio.h                   |    2 +-
+ core/integrator.cpp              |    2 +-
+ core/integrator.h                |    2 +-
+ core/intersection.cpp            |    2 +-
+ core/intersection.h              |    2 +-
+ core/kdtree.h                    |    2 +-
+ core/light.cpp                   |    2 +-
+ core/light.h                     |    2 +-
+ core/material.cpp                |    2 +-
+ core/material.h                  |    2 +-
+ core/memory.cpp                  |    2 +-
+ core/memory.h                    |    2 +-
+ core/mipmap.h                    |    2 +-
+ core/montecarlo.cpp              |    2 +-
+ core/montecarlo.h                |    2 +-
+ core/octree.h                    |    2 +-
+ core/parallel.cpp                |    2 +-
+ core/parallel.h                  |    2 +-
+ core/paramset.cpp                |    2 +-
+ core/paramset.h                  |    2 +-
+ core/parser.cpp                  |    2 +-
+ core/parser.h                    |    2 +-
+ core/pbrt.h                      |    2 +-
+ core/pbrtlex.ll                  |    2 +-
+ core/pbrtparse.yy                |    2 +-
+ core/primitive.cpp               |    2 +-
+ core/primitive.h                 |    2 +-
+ core/probes.cpp                  |    2 +-
+ core/probes.h                    |    2 +-
+ core/progressreporter.cpp        |    2 +-
+ core/progressreporter.h          |    2 +-
+ core/quaternion.cpp              |    2 +-
+ core/quaternion.h                |    2 +-
+ core/reflection.cpp              |    2 +-
+ core/reflection.h                |    2 +-
+ core/renderer.cpp                |    2 +-
+ core/renderer.h                  |    2 +-
+ core/rng.cpp                     |    2 +-
+ core/rng.h                       |    2 +-
+ core/sampler.cpp                 |    2 +-
+ core/sampler.h                   |    2 +-
+ core/scene.cpp                   |    2 +-
+ core/scene.h                     |    2 +-
+ core/sh.cpp                      |    2 +-
+ core/sh.h                        |    2 +-
+ core/shape.cpp                   |    2 +-
+ core/shape.h                     |    2 +-
+ core/shrots.cpp                  |    2 +-
+ core/spectrum.cpp                |    2 +-
+ core/spectrum.h                  |    2 +-
+ core/texture.cpp                 |    2 +-
+ core/texture.h                   |    2 +-
+ core/timer.cpp                   |    2 +-
+ core/timer.h                     |    2 +-
+ core/transform.cpp               |    2 +-
+ core/transform.h                 |    2 +-
+ core/volume.cpp                  |    2 +-
+ core/volume.h                    |    2 +-
+ film/image.cpp                   |    2 +-
+ film/image.h                     |    2 +-
+ filters/box.cpp                  |    2 +-
+ filters/box.h                    |    2 +-
+ filters/gaussian.cpp             |    2 +-
+ filters/gaussian.h               |    2 +-
+ filters/mitchell.cpp             |    2 +-
+ filters/mitchell.h               |    2 +-
+ filters/sinc.cpp                 |    2 +-
+ filters/sinc.h                   |    2 +-
+ filters/triangle.cpp             |    2 +-
+ filters/triangle.h               |    2 +-
+ integrators/ambientocclusion.cpp |    2 +-
+ integrators/ambientocclusion.h   |    2 +-
+ integrators/diffuseprt.cpp       |    2 +-
+ integrators/diffuseprt.h         |    2 +-
+ integrators/dipolesubsurface.cpp |    2 +-
+ integrators/dipolesubsurface.h   |    2 +-
+ integrators/directlighting.cpp   |    2 +-
+ integrators/directlighting.h     |    2 +-
+ integrators/emission.cpp         |    2 +-
+ integrators/emission.h           |    2 +-
+ integrators/glossyprt.cpp        |    2 +-
+ integrators/glossyprt.h          |    2 +-
+ integrators/igi.cpp              |    2 +-
+ integrators/igi.h                |    2 +-
+ integrators/irradiancecache.cpp  |    2 +-
+ integrators/irradiancecache.h    |    2 +-
+ integrators/path.cpp             |    2 +-
+ integrators/path.h               |    2 +-
+ integrators/photonmap.cpp        |    2 +-
+ integrators/photonmap.h          |    2 +-
+ integrators/single.cpp           |    2 +-
+ integrators/single.h             |    2 +-
+ integrators/useprobes.cpp        |    2 +-
+ integrators/useprobes.h          |    2 +-
+ integrators/whitted.cpp          |    2 +-
+ integrators/whitted.h            |    2 +-
+ lights/diffuse.cpp               |    2 +-
+ lights/diffuse.h                 |    2 +-
+ lights/distant.cpp               |    2 +-
+ lights/distant.h                 |    2 +-
+ lights/goniometric.cpp           |    2 +-
+ lights/goniometric.h             |    2 +-
+ lights/infinite.cpp              |    2 +-
+ lights/infinite.h                |    2 +-
+ lights/point.cpp                 |    2 +-
+ lights/point.h                   |    2 +-
+ lights/projection.cpp            |    2 +-
+ lights/projection.h              |    2 +-
+ lights/spot.cpp                  |    2 +-
+ lights/spot.h                    |    2 +-
+ main/pbrt.cpp                    |    2 +-
+ materials/glass.cpp              |    2 +-
+ materials/glass.h                |    2 +-
+ materials/kdsubsurface.cpp       |    2 +-
+ materials/kdsubsurface.h         |    2 +-
+ materials/matte.cpp              |    2 +-
+ materials/matte.h                |    2 +-
+ materials/measured.cpp           |    2 +-
+ materials/measured.h             |    2 +-
+ materials/metal.cpp              |    2 +-
+ materials/metal.h                |    2 +-
+ materials/mirror.cpp             |    2 +-
+ materials/mirror.h               |    2 +-
+ materials/mixmat.cpp             |    2 +-
+ materials/mixmat.h               |    2 +-
+ materials/plastic.cpp            |    2 +-
+ materials/plastic.h              |    2 +-
+ materials/substrate.cpp          |    2 +-
+ materials/substrate.h            |    2 +-
+ materials/subsurface.cpp         |    2 +-
+ materials/subsurface.h           |    2 +-
+ materials/translucent.cpp        |    2 +-
+ materials/translucent.h          |    2 +-
+ materials/uber.cpp               |    2 +-
+ materials/uber.h                 |    2 +-
+ renderers/aggregatetest.cpp      |    2 +-
+ renderers/aggregatetest.h        |    2 +-
+ renderers/createprobes.cpp       |    2 +-
+ renderers/createprobes.h         |    2 +-
+ renderers/metropolis.cpp         |    2 +-
+ renderers/metropolis.h           |    2 +-
+ renderers/samplerrenderer.cpp    |    2 +-
+ renderers/samplerrenderer.h      |    2 +-
+ renderers/surfacepoints.cpp      |    2 +-
+ renderers/surfacepoints.h        |    2 +-
+ samplers/adaptive.cpp            |    2 +-
+ samplers/adaptive.h              |    2 +-
+ samplers/bestcandidate.cpp       |    2 +-
+ samplers/bestcandidate.h         |    2 +-
+ samplers/halton.cpp              |    2 +-
+ samplers/halton.h                |    2 +-
+ samplers/lowdiscrepancy.cpp      |    2 +-
+ samplers/lowdiscrepancy.h        |    2 +-
+ samplers/random.cpp              |    2 +-
+ samplers/random.h                |    2 +-
+ samplers/stratified.cpp          |    2 +-
+ samplers/stratified.h            |    2 +-
+ shapes/cone.cpp                  |    2 +-
+ shapes/cone.h                    |    2 +-
+ shapes/cylinder.cpp              |    2 +-
+ shapes/cylinder.h                |    2 +-
+ shapes/disk.cpp                  |    2 +-
+ shapes/disk.h                    |    2 +-
+ shapes/heightfield.cpp           |    2 +-
+ shapes/heightfield.h             |    2 +-
+ shapes/hyperboloid.cpp           |    2 +-
+ shapes/hyperboloid.h             |    2 +-
+ shapes/loopsubdiv.cpp            |    2 +-
+ shapes/loopsubdiv.h              |    2 +-
+ shapes/nurbs.cpp                 |    2 +-
+ shapes/nurbs.h                   |    2 +-
+ shapes/paraboloid.cpp            |    2 +-
+ shapes/paraboloid.h              |    2 +-
+ shapes/sphere.cpp                |    2 +-
+ shapes/sphere.h                  |    2 +-
+ shapes/trianglemesh.cpp          |    2 +-
+ shapes/trianglemesh.h            |    2 +-
+ textures/bilerp.cpp              |    2 +-
+ textures/bilerp.h                |    2 +-
+ textures/checkerboard.cpp        |    2 +-
+ textures/checkerboard.h          |    2 +-
+ textures/constant.cpp            |    2 +-
+ textures/constant.h              |    2 +-
+ textures/dots.cpp                |    2 +-
+ textures/dots.h                  |    2 +-
+ textures/fbm.cpp                 |    2 +-
+ textures/fbm.h                   |    2 +-
+ textures/imagemap.cpp            |    2 +-
+ textures/imagemap.h              |    2 +-
+ textures/marble.cpp              |    2 +-
+ textures/marble.h                |    2 +-
+ textures/mix.cpp                 |    2 +-
+ textures/mix.h                   |    2 +-
+ textures/scale.cpp               |    2 +-
+ textures/scale.h                 |    2 +-
+ textures/uv.cpp                  |    2 +-
+ textures/uv.h                    |    2 +-
+ textures/windy.cpp               |    2 +-
+ textures/windy.h                 |    2 +-
+ textures/wrinkled.cpp            |    2 +-
+ textures/wrinkled.h              |    2 +-
+ volumes/exponential.cpp          |    2 +-
+ volumes/exponential.h            |    2 +-
+ volumes/homogeneous.cpp          |    2 +-
+ volumes/homogeneous.h            |    2 +-
+ volumes/volumegrid.cpp           |    2 +-
+ volumes/volumegrid.h             |    2 +-
+ win32/unistd.h                   |    2 +-
+ 238 files changed, 238 insertions(+), 238 deletions(-)
+
+commit 526d4c62760bf1f3e9c0c9dcdc05f46318e48887
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jan 4 06:03:24 2010 -0800
+
+    Cleanup and refactoring of Metropolis code.
+    Fixed bugs/improved handling of specular BSDFs (especially mixed specular, non-specular BSDFs.)
+    Removed Kelemen et al weighting terms and just use vanilla contribution weights: they are indeed marginally better, but ran out of time to explain them in the book text. :-(
+
+ renderers/metropolis.cpp |  176 +++++++++++++++++++++++----------------------
+ renderers/metropolis.h   |   13 ++--
+ 2 files changed, 95 insertions(+), 94 deletions(-)
+
+commit a092132c28238c9c3f17520ea312e14f5fe8399f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jan 4 05:59:43 2010 -0800
+
+    Add max depth parameter to IGI light path shooting code.  This is essentially a temporary work-around pending debugging why sometimes very long light paths are generated and never terminated.
+
+ integrators/igi.cpp |    5 ++++-
+ integrators/igi.h   |    3 ++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+commit fd3efc1356e5baef1424f48e8c9eb5c829a633b6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jan 4 05:59:11 2010 -0800
+
+    Bug fixes for better robustness when inf values come up in computing ray differentials.  Also, when things fail, force point sampling rather than arbitrary non-zero estimates of change in texture coordinates.
+
+ core/diffgeom.cpp  |    7 +++++--
+ core/transform.cpp |    9 +++++----
+ 2 files changed, 10 insertions(+), 6 deletions(-)
+
+commit 3125e8ab4091b447aa96bc73e206237989e4849d
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jan 4 05:58:17 2010 -0800
+
+    Add BxDFType parameter to EstimateDirect() so that a subset of the BSDF can be flagged to be used in the direct lighting calculation.  (Previously this was effectively BSDF_ALL & ~BSDF_SPECULAR.)
+    
+    Along the way, fix very old bug by passing these flags to the BSDF::Pdf() call for MIS: previously the default of BSDF_ALL had been passed to this, meaning that the PDF computed was incorrect when only non-specular BSDF components were being included in the direct lighting computation and there were specular components in the BSDF as well.
+
+ core/integrator.cpp |   52 +++++++++++++++++++++++++++-----------------------
+ core/integrator.h   |    3 +-
+ 2 files changed, 30 insertions(+), 25 deletions(-)
+
+commit 3896b535a93e13e5f8b4983c6f1a65b13d4e60ac
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Jan 4 05:55:40 2010 -0800
+
+    Small cleanups:
+    - add Info() call to BVH to give built tree info
+    - Fix up computations in exrdiff to not confusingly include alpha, report results in same units as exravg
+
+ accelerators/bvh.cpp |    2 ++
+ tools/exrdiff.cpp    |   12 +++++++-----
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+commit 364cc0e0b8a76d19771894e55ce426ce979d57cc
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 30 06:44:46 2009 -0800
+
+    In API code, default Renderer is "sampler", now "sample" now.
+
+ core/api.cpp |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit ba79ef8abe6a5159278d809b2c975fde9a30a163
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 30 06:42:58 2009 -0800
+
+    Modify UberMaterial so that index of refraction can be specified rather than being hard-coded.
+
+ materials/uber.cpp |    8 +++++---
+ materials/uber.h   |    5 +++--
+ 2 files changed, 8 insertions(+), 5 deletions(-)
+
+commit 011f0e3055e0c8a03910301c1122b1bd4bb165ed
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 30 06:42:29 2009 -0800
+
+    Add Info() calls when textures loaded.
+
+ core/imageio.cpp |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit b9392b4430e9da3d61e28f56e64cca3aa28370dd
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 30 06:42:11 2009 -0800
+
+    Add command line option to override output image file name.
+    Update startup text, expand copyright range to 2010.
+
+ core/pbrt.h    |    3 ++-
+ film/image.cpp |   13 ++++++-------
+ main/pbrt.cpp  |    7 ++++---
+ 3 files changed, 12 insertions(+), 11 deletions(-)
+
+commit 5220e1a7c2649287a3cbeb2fe17ee9b4945383a9
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 22 17:52:51 2009 -0800
+
+    Fix TGA reader to handle flipped images properly.
+
+ core/imageio.cpp |   43 +++++++++++++++++++------------------------
+ 1 files changed, 19 insertions(+), 24 deletions(-)
+
+commit c158997e3aa6e1846bbd3eac5bcdb8e2298d6070
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 22 15:36:14 2009 -0800
+
+    Better handle degenerate case in triangle differential geometry computation.
+
+ shapes/trianglemesh.cpp |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit dda52dae62e63a22f5ad206faf8deb30abda6c44
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 22 15:35:52 2009 -0800
+
+    Adding missing fclose() calls in TGA reading code.
+
+ core/imageio.cpp |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 767ee8babf94ae883fc5600b84f16a42b1077617
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Dec 21 10:16:49 2009 -0800
+
+    Many Metropolis fixes and cleanups/refactoring.
+
+ renderers/metropolis.cpp |  679 +++++++++++++++++++++++-----------------------
+ renderers/metropolis.h   |   35 ++-
+ 2 files changed, 362 insertions(+), 352 deletions(-)
+
+commit 50f908e3aef5d3cefcc7225362b798cce3e3dbc8
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Dec 21 10:16:25 2009 -0800
+
+    In debug builds, overwrite contents of memory blocks when MemoryArena::FreeAll() is called.
+
+ core/memory.h |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 8624ff91147a180f72fde9a63ff40279689be02e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Dec 21 10:15:38 2009 -0800
+
+    Temporarily comment out index of refraction effect on radiance at refraction until bug found and fixed.
+
+ core/reflection.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1b435e58260084e5106c9b0a0ab595ce51191348
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Dec 21 10:15:13 2009 -0800
+
+    Fix low-discrepancy sampling routines to return values in [0,1) and never return sample values of 1 (which were leading to NaNs...)
+
+ core/montecarlo.h |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 1042a45e27eaf7ae3fa219c53c055e2b3971165f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 15 13:32:25 2009 -0800
+
+    x64 windows build support.  use NDEBUG for release builds on windows
+
+ pbrt.sln    |    6 ++
+ pbrt.vcproj |  206 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 207 insertions(+), 5 deletions(-)
+
+commit f662c4068e04ec66c58b80a2bff1b2a643ae5e93
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 15 05:27:00 2009 -0800
+
+    PhotonMap bugfix: stop incrementing nDirectPaths count after we've stopped storing more direct photons.
+
+ integrators/photonmap.cpp |   11 +++++------
+ 1 files changed, 5 insertions(+), 6 deletions(-)
+
+commit 8c8006f9a9fc409911fc13644b4025459d5bc35e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 15 05:26:38 2009 -0800
+
+    Ugly hack: use ray.depth to indicate to triangle mesh alpha texture when to ignore the texture; use this to enable invisible area lights that still emit light into the scene.
+
+ core/shape.cpp          |    1 +
+ shapes/trianglemesh.cpp |    4 +++-
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 0c8276f3967dbb43f012f3e60fbad35a1cefabd8
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 15 05:25:50 2009 -0800
+
+    AdaptiveSampler bugfix: don't pass uninitialized member variable to Sampler constructor.
+
+ samplers/adaptive.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5c9f44281da35e5a96afd881422693a85c78fa27
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 15 05:25:08 2009 -0800
+
+    Add RayDifferential::ScaleDifferentials() method.
+    Use it to adjust differentials based on actual sampling rate.
+    Textures are noticeably less blurry(!).
+
+ core/geometry.h               |    6 ++++++
+ renderers/metropolis.cpp      |   29 ++++++++++++-----------------
+ renderers/metropolis.h        |    9 +++++++++
+ renderers/samplerrenderer.cpp |    1 +
+ 4 files changed, 28 insertions(+), 17 deletions(-)
+
+commit 6e02fabba49a6e480e5a583f1c3a2e6c23287843
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Dec 12 13:06:49 2009 -0800
+
+    Many metropolis improvements/fixes:
+    - Added support for bidirectional path tracing (the default)
+    - Increased default max depth to 7
+    - Many small cleanups
+    
+    Note that bidir Metropolis has a known bug with some specular paths being under-weighted.  This should be fixed soon.
+
+ renderers/metropolis.cpp |  480 ++++++++++++++++++++++++++++++----------------
+ renderers/metropolis.h   |    5 +-
+ 2 files changed, 315 insertions(+), 170 deletions(-)
+
+commit 673215ea75441aa0b482508ce658f61117e084a3
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Dec 12 13:05:15 2009 -0800
+
+    Fix bug in computation of PDF for sampling discrete distributions.  (Corrects results with multiple light sources for IGI, Photon map, and Metropolis integrators.)
+
+ core/montecarlo.h |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit e9a9e419e34b9c843db54305c3fd82affcc2d0b4
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Dec 12 12:17:02 2009 -0800
+
+    x64 build fixes for Windows
+
+ core/parallel.h |    4 ++++
+ core/pbrt.h     |    1 +
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 9dc2269fc90035118f8accff45a6907ffacdfe0c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Dec 12 11:42:23 2009 -0800
+
+    Triangle mesh epsilon fix.
+
+ shapes/trianglemesh.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 85200ac63d1ec2b812012cd99311c60f26257179
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 9 11:05:13 2009 -0800
+
+    Many Metropolis fixes, cleanups.
+
+ renderers/metropolis.cpp |  422 +++++++++++++++++++++++++---------------------
+ renderers/metropolis.h   |    3 +-
+ 2 files changed, 234 insertions(+), 191 deletions(-)
+
+commit 78dbb948303bdeed9c19130d7bdd5eb7be49e25b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 9 11:04:48 2009 -0800
+
+    NaN bug fix in SinPhi() and CosPhi() for BSDFs.
+
+ core/reflection.h |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit f35665809b029a3e09f5185ccc3e4057b7ef3850
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 9 11:04:32 2009 -0800
+
+    Remove unnecessarily private Intersection assignment operator, constructor.
+
+ core/intersection.h |    4 ----
+ 1 files changed, 0 insertions(+), 4 deletions(-)
+
+commit 7122897fb3f6f9058529772b89976599bb4ed543
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Dec 9 11:04:11 2009 -0800
+
+    Make BSDF * to EstimateDirect() const.
+
+ core/integrator.cpp |    2 +-
+ core/integrator.h   |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit f0d65a11ec53674d26b6ad9fde9800131fd9787a
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Dec 7 18:07:05 2009 -0800
+
+    metro fixes
+
+ renderers/metropolis.cpp |  239 ++++++++++++++++++++++++++-------------------
+ renderers/metropolis.h   |   12 +-
+ 2 files changed, 144 insertions(+), 107 deletions(-)
+
+commit 5c09a50e7f529f987797201fd7df97ee0de24856
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Dec 7 17:48:39 2009 -0800
+
+    Const-ify Sample02() declaration.
+
+ core/montecarlo.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d16d1076ba4a191e13ce2c1a7735922b284e081b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Dec 7 17:48:27 2009 -0800
+
+    Two small alpha texture related fixes
+
+ core/light.cpp          |    5 +++--
+ shapes/trianglemesh.cpp |   22 +++++++++++++++++++++-
+ 2 files changed, 24 insertions(+), 3 deletions(-)
+
+commit 2d17233d12ffba5a6d5cce8f63a4de3e7068684d
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Dec 5 08:55:53 2009 -0800
+
+    Fix bug in ShapeSet sampling routines.  After the chosen shape samples a point, find the closest intersection along the ray from the point being lit with all of the shapes and use that point as the emission point.  (Volodymyr Kachurovskyi)
+
+ core/light.cpp |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
+
+commit 8ec72ccc4f06c39e6e27e27b9059db0985a24434
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Dec 5 08:54:35 2009 -0800
+
+    Sphere: fix NaN bug from acos() call; clamp values to be in [-1,1] first.
+
+ shapes/sphere.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 62fa197c600d8bc96bc1a962bf8edffd431b8167
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Dec 3 17:05:08 2009 -0800
+
+    Fix, I think, bug with sphere zmin/zmax test inadvertently causing invalid misses
+
+ shapes/sphere.cpp |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+commit 70b62fabca61744d698f46ec33c73a095bad3c12
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Dec 3 16:59:03 2009 -0800
+
+    Metropolis normalization map WIP
+    Sphere small cleanups
+
+ renderers/metropolis.cpp |   72 +++++++++++++++++++++++++++++++++++-----------
+ renderers/metropolis.h   |    4 ++-
+ shapes/sphere.cpp        |    8 ++--
+ 3 files changed, 62 insertions(+), 22 deletions(-)
+
+commit a86775807d1446aa17dec3ffdb2891418f2a82c3
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Dec 3 16:58:48 2009 -0800
+
+    BVH fixes (Solomon Boulos)
+
+ accelerators/bvh.cpp |   48 +++++++++++++++++++++++++++++++-----------------
+ 1 files changed, 31 insertions(+), 17 deletions(-)
+
+commit 2986db6c7388e1179bf0e9768112bbc30efacaed
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Dec 3 16:58:14 2009 -0800
+
+    Add support for alpha mask textures to triangle mesh shape.
+
+ core/api.cpp            |    2 +-
+ core/paramset.cpp       |    6 +++-
+ shapes/trianglemesh.cpp |   52 +++++++++++++++++++++++++++++++++++++++++-----
+ shapes/trianglemesh.h   |   10 ++++++--
+ 4 files changed, 58 insertions(+), 12 deletions(-)
+
+commit 44bcb5a03c335ef3a4a071c77de950fc23bc78ec
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Dec 3 16:56:19 2009 -0800
+
+    Fix photon map integrator to not crash when no lighs present.
+
+ integrators/photonmap.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit e2e1bf538a2b029e4c2a089ddbd6cceeffeb9519
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Dec 3 16:55:59 2009 -0800
+
+    Don't issue warnings when parsing files with DOS line endings.
+
+ core/pbrtlex.ll |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d33ec882527f79cb3f9ef31c9a660a684819e440
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Dec 3 16:55:46 2009 -0800
+
+    Formatting fix.
+
+ integrators/dipolesubsurface.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0647219505acbfb190accd3794a55184f8cc9e72
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 1 09:53:08 2009 -0800
+
+    Metropolis: when doing lighting calculations, sample from lights according to power.
+    This also fixes a lurking bug where it previously didn't handle the case of multiple light sources correctly (old code was missing a scale by num lights)
+
+ renderers/metropolis.cpp |   30 ++++++++++++++++++------------
+ 1 files changed, 18 insertions(+), 12 deletions(-)
+
+commit 56088ffc4760fb290fdab35d244ba156fab48c96
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 1 09:51:58 2009 -0800
+
+    Xiong "Tomwindcloud" Wei: smarter way of handling rays that just miss the sphere.
+
+ shapes/sphere.cpp |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+commit 5f0d5583a5b22f359b001d5b840efaba10e158e5
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 1 09:51:13 2009 -0800
+
+    Don't store direct photons unless final gathering is being performed.
+
+ integrators/photonmap.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ed2975d01093b4b3ebf9ea390db4b408767c858c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Dec 1 09:50:06 2009 -0800
+
+    Cache SPDs loaded from files so that if reused many times, we don't pay the price of reading them from disk and converting them to the current spectral representation.
+
+ core/paramset.cpp |    7 +++++++
+ core/paramset.h   |    1 +
+ 2 files changed, 8 insertions(+), 0 deletions(-)
+
+commit cb6be67576f9dc0e50ad006ec73df80ae90971e6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 29 16:44:54 2009 -0800
+
+    Formatting and whitespace changes.  No functional differences.
+
+ accelerators/bvh.cpp            |    5 +++--
+ accelerators/kdtreeaccel.cpp    |    2 +-
+ core/camera.cpp                 |    2 +-
+ core/camera.h                   |    3 ++-
+ core/film.h                     |    3 ++-
+ core/geometry.h                 |   29 ++++++-----------------------
+ core/integrator.cpp             |   12 +++++++-----
+ core/light.cpp                  |   12 ++++++------
+ core/mipmap.h                   |    2 +-
+ core/montecarlo.cpp             |   12 +++++++-----
+ core/montecarlo.h               |   11 ++++++-----
+ core/primitive.h                |    2 +-
+ core/reflection.cpp             |   27 ++++++++++++++++-----------
+ core/reflection.h               |   12 ++++++------
+ core/sh.cpp                     |    3 ++-
+ core/sh.h                       |    4 ++--
+ core/shape.cpp                  |    8 ++++----
+ core/shape.h                    |    3 ++-
+ core/spectrum.cpp               |    8 ++++----
+ core/spectrum.h                 |    4 ++--
+ core/transform.cpp              |    7 +++----
+ core/transform.h                |    3 +--
+ core/volume.h                   |    9 ++++++---
+ integrators/dipolesubsurface.h  |    2 +-
+ integrators/igi.cpp             |    6 ++++--
+ integrators/irradiancecache.cpp |    7 ++++---
+ integrators/path.cpp            |    3 ++-
+ integrators/photonmap.cpp       |    7 ++++---
+ lights/distant.cpp              |    9 +++++----
+ lights/goniometric.cpp          |    5 +++--
+ lights/goniometric.h            |    3 ++-
+ lights/infinite.cpp             |    8 ++++----
+ lights/point.cpp                |    2 +-
+ materials/measured.cpp          |    2 +-
+ materials/plastic.cpp           |    2 +-
+ materials/plastic.h             |    6 ++++--
+ renderers/metropolis.cpp        |    4 ++--
+ renderers/samplerrenderer.cpp   |    6 +++---
+ renderers/samplerrenderer.h     |    6 +++---
+ samplers/adaptive.cpp           |    3 ++-
+ samplers/adaptive.h             |    3 ++-
+ samplers/bestcandidate.h        |    3 ++-
+ samplers/lowdiscrepancy.cpp     |    3 ++-
+ textures/imagemap.cpp           |    9 +++++----
+ textures/imagemap.h             |    3 ++-
+ volumes/volumegrid.h            |    4 ++--
+ 46 files changed, 152 insertions(+), 137 deletions(-)
+
+commit f74ab4865f8d5e18f909272180a843342ae8c0bf
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 29 05:47:44 2009 -0800
+
+    Fix bug in photon deposition logic: was previously storing direct lighting photons in the caustic map when indirectDone was true.  So now only store in the caustic map if nIntersections > 1!
+
+ integrators/photonmap.cpp |   23 ++++++++++++++---------
+ 1 files changed, 14 insertions(+), 9 deletions(-)
+
+commit e8abc78e2b46aca8a97e96fd1b5ed34dfad63233
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 29 05:46:23 2009 -0800
+
+    exrdiff: return 1 when images have differences
+
+ tools/exrdiff.cpp |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 26e9587851a851e908f12571194d089e3caeb1b1
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 29 05:46:11 2009 -0800
+
+    Small formatting changes and code cleanups.  Should be no functional differences.
+
+ integrators/photonmap.cpp |  126 +++++++++++++++++++++-----------------------
+ integrators/photonmap.h   |    3 +-
+ renderers/metropolis.cpp  |   61 ++++++++++-----------
+ 3 files changed, 90 insertions(+), 100 deletions(-)
+
+commit 2192f0ec3efb22202cfdcb3d2bf00ef1d9f62514
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 27 11:42:24 2009 -0800
+
+    Use DirectLightingIntegrator to do Metropolis direct lighting calculation.
+    Use SamplerRenderer's RenderTask to do direct lighting tasks.
+    Temporary hack to write out the image with Metropolis renderer every once in a while.
+    Fixed calculations about when to include direct lighting, emission, etc, from objects when direct lighting is being done separately.
+    Removed indirectOnly for Metropolis integrator.
+
+ renderers/metropolis.cpp |  232 ++++++++++-----------------------------------
+ renderers/metropolis.h   |    6 +-
+ 2 files changed, 56 insertions(+), 182 deletions(-)
+
+commit 2f4515e787241dc653f59cd6c5b7aaef8dd34d66
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 27 11:39:14 2009 -0800
+
+    Fix IGI bias-compensation computation: was missing a cos theta term at the point the gather rays hit.
+
+ integrators/igi.cpp |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
+
+commit 4c7fa0dee1e129cd82e7e3d9ef4de425ee6f06f6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 27 11:38:44 2009 -0800
+
+    Small cleanups and code formatting changes.  Should be no functional differences.
+
+ core/integrator.cpp             |    9 ++++-----
+ integrators/igi.cpp             |   25 +++++++++++--------------
+ integrators/igi.h               |   12 ++++++------
+ integrators/irradiancecache.cpp |   35 +++++++++++++++++------------------
+ integrators/irradiancecache.h   |    8 +++-----
+ integrators/path.cpp            |   28 ++++++++++++++--------------
+ renderers/createprobes.cpp      |    2 +-
+ 7 files changed, 56 insertions(+), 63 deletions(-)
+
+commit a03cc467985421d2c033a5e4853243af800f2397
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 27 11:35:28 2009 -0800
+
+    Added splatScale parameter to Film::WriteImage() so can write out partial images during rendering
+
+ core/film.h    |    2 +-
+ film/image.cpp |    8 ++++----
+ film/image.h   |    2 +-
+ 3 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 32a3e69f825b0cb2a817220000bf1d1ea44e5f1b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 27 11:34:02 2009 -0800
+
+    Renamed SampleRenderer to SamplerRenderer to be a little more clear
+
+ core/api.cpp |    4 ++--
+ pbrt.vcproj  |    4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit aa9017abb088b6ec483195d16967e1d5c9c27440
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Nov 25 10:08:31 2009 -0800
+
+    Don't resample the default copper SPDs each time CreateMetalMaterial() is called.
+
+ materials/metal.cpp |   13 +++++++------
+ 1 files changed, 7 insertions(+), 6 deletions(-)
+
+commit b7d630cca327bfebcf0d2c63de46f0ca09b540ca
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Nov 25 10:08:07 2009 -0800
+
+    Optimize computation of K term in SH routines with new divfact() routine; computed (a-b)!/(a+b)! more efficiently than by doing the two factorials and dividing (better numeric accuracy too).
+
+ core/pbrt.h |    2 ++
+ core/sh.cpp |   20 +++++++++++++++-----
+ 2 files changed, 17 insertions(+), 5 deletions(-)
+
+commit 13ac1086b2bffe590c0378cbb7b48f47d3b3a065
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Nov 25 10:07:18 2009 -0800
+
+    Small code cleanups, formatting changes
+    Removed option to not do transfer matrix in GlossyPRTIntegrator
+
+ core/integrator.h         |    4 +-
+ core/sh.cpp               |   68 ++++++++++++++++++++++----------------------
+ core/sh.h                 |    6 ++--
+ integrators/glossyprt.cpp |   33 ++++-----------------
+ integrators/glossyprt.h   |   16 ++++++----
+ main/pbrt.cpp             |    9 +++++-
+ shapes/trianglemesh.cpp   |    4 +-
+ 7 files changed, 65 insertions(+), 75 deletions(-)
+
+commit 3ba763d747c6e559f60a24cc8be62c7be3c43a68
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 23 16:19:49 2009 -0800
+
+    Change BSDF::rho() to take RNG and generate stratified samples itself; don't have samples passed in.
+    Less flexible than old implementation, but calling code is much simpler (and everyone just generated stratified samples anyway.)
+
+ core/reflection.cpp        |   20 ++++++++++++++------
+ core/reflection.h          |   11 +++++------
+ integrators/diffuseprt.cpp |   16 +++++-----------
+ integrators/igi.cpp        |    6 +-----
+ integrators/photonmap.cpp  |   30 ++++--------------------------
+ integrators/useprobes.cpp  |   15 ++++-----------
+ 6 files changed, 33 insertions(+), 65 deletions(-)
+
+commit 0ca9745ea2eabe21b6176ddb0034d602e8b0c215
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 23 16:18:48 2009 -0800
+
+    Small code cleanups, reformatting.  Should be no functional changes.
+
+ core/light.cpp             |    3 +-
+ core/light.h               |    5 ++-
+ core/sh.cpp                |   67 ++++++++++++++++++++-----------------------
+ core/sh.h                  |   50 +++++++++++++++-----------------
+ integrators/diffuseprt.cpp |    7 ++--
+ integrators/diffuseprt.h   |    6 +--
+ integrators/useprobes.cpp  |   25 ++++++----------
+ lights/infinite.cpp        |   21 ++++++--------
+ 8 files changed, 83 insertions(+), 101 deletions(-)
+
+commit c8664768ea661ed0653cd221d61f54497ed357d7
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 23 16:15:56 2009 -0800
+
+    Reworked CreateProbes renderer to take integrators specified by scene description file.
+
+ core/api.cpp               |   11 +++++-
+ renderers/createprobes.cpp |   81 ++++++++++++++-----------------------------
+ renderers/createprobes.h   |   20 +++++------
+ 3 files changed, 45 insertions(+), 67 deletions(-)
+
+commit 2464e1816e07522fff8180401769ba5d1bf8d839
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 22 10:46:12 2009 -0800
+
+    Add new renderers/surfacepoints* stuff to MSVC build.
+
+ pbrt.vcproj |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 855caba8e78947db7766d6e03b850961f13a3bcb
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 22 10:16:13 2009 -0800
+
+    Removed specialized BSDF::Sample_f() for Whitted only; it calls the regular one now.
+
+ core/integrator.cpp     |   20 ++++++++++++--------
+ core/reflection.cpp     |   10 ----------
+ core/reflection.h       |    2 --
+ integrators/whitted.cpp |   17 +++++++----------
+ 4 files changed, 19 insertions(+), 30 deletions(-)
+
+commit 823f5acd9d85f0a39ac425876ffff371d7c2c58d
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 22 10:15:49 2009 -0800
+
+    Moved computation of Poisson-distributed surface points to surface points renderer.
+    Added ability to precompute them for subsurface, store in a file for use by DipoleSubsurfaceIntegrator.
+
+ core/api.cpp                     |    6 +
+ core/dtrace.d                    |    4 +-
+ integrators/dipolesubsurface.cpp |  260 +++++++-------------------------------
+ integrators/dipolesubsurface.h   |   20 ++-
+ 4 files changed, 69 insertions(+), 221 deletions(-)
+
+commit 977cc60bd3b0a3b653136bc38f2daf9ee04cb83f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 22 10:14:37 2009 -0800
+
+    Added global PbrtOptions structure to hold global options (num cores, etc.)
+    Options can now be set via command line args.
+    Initialized via pbrtInit()
+    Replaced much code that did getenv()s to get this info with accesses to this.
+
+ core/api.cpp                     |    6 ++++-
+ core/api.h                       |    2 +-
+ core/parallel.cpp                |   15 ++++++-------
+ core/parser.cpp                  |    6 ++--
+ core/parser.h                    |    2 +-
+ core/pbrt.h                      |   10 +++++++++
+ core/probes.h                    |    4 +-
+ core/progressreporter.cpp        |    9 +++++--
+ film/image.cpp                   |    6 ++--
+ integrators/ambientocclusion.cpp |    2 +-
+ integrators/igi.cpp              |    2 +-
+ integrators/irradiancecache.cpp  |    2 +-
+ integrators/photonmap.cpp        |    8 +++---
+ lights/diffuse.cpp               |    2 +-
+ lights/infinite.cpp              |    2 +-
+ main/pbrt.cpp                    |   39 ++++++++++++++++++++++++++-----------
+ renderers/createprobes.cpp       |    2 +-
+ renderers/metropolis.cpp         |    2 +-
+ samplers/adaptive.cpp            |    2 +-
+ samplers/bestcandidate.cpp       |    2 +-
+ samplers/halton.cpp              |    2 +-
+ samplers/lowdiscrepancy.cpp      |    2 +-
+ samplers/stratified.cpp          |    2 +-
+ tools/bsdftest.cpp               |    3 +-
+ 24 files changed, 83 insertions(+), 51 deletions(-)
+
+commit ef67ec2eec9fbe7a7363e5f4e12660d7cb73856f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 22 10:11:16 2009 -0800
+
+    Small cleanups, formatting changes.  Should be no functional differences.
+
+ accelerators/bvh.cpp            |  154 +++++++++++++++++++--------------------
+ core/renderer.h                 |    8 +-
+ core/scene.cpp                  |    2 +-
+ core/volume.cpp                 |    2 +-
+ integrators/directlighting.cpp  |    6 +-
+ integrators/emission.cpp        |    3 +-
+ integrators/igi.cpp             |    6 +-
+ integrators/irradiancecache.cpp |    6 +-
+ integrators/photonmap.cpp       |    6 +-
+ renderers/metropolis.cpp        |    7 +-
+ renderers/sample.cpp            |   33 +++++----
+ 11 files changed, 114 insertions(+), 119 deletions(-)
+
+commit b4df933533be63f25b0b647fb040974152784a0c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 17 17:42:16 2009 -0800
+
+    Many small formatting fixes, small variable renamings, etc.
+
+ accelerators/bvh.cpp         |   20 +++++--------
+ accelerators/bvh.h           |    2 +-
+ accelerators/grid.cpp        |   61 ++++++++++++++++++++---------------------
+ accelerators/grid.h          |   20 +++++---------
+ accelerators/kdtreeaccel.cpp |   34 ++++++++++++-----------
+ accelerators/kdtreeaccel.h   |    7 ++---
+ core/film.h                  |    3 +-
+ core/montecarlo.cpp          |   38 +++++++++++++------------
+ core/montecarlo.h            |   15 +++++-----
+ core/primitive.h             |   10 ++-----
+ film/image.cpp               |    6 ++--
+ filters/gaussian.h           |   11 +++-----
+ filters/sinc.h               |    3 +-
+ renderers/aggregatetest.cpp  |    2 +-
+ samplers/adaptive.cpp        |    4 ++-
+ samplers/bestcandidate.cpp   |    2 +-
+ samplers/bestcandidate.h     |    8 +++---
+ samplers/lowdiscrepancy.cpp  |   12 ++++----
+ samplers/lowdiscrepancy.h    |    8 ++---
+ 19 files changed, 125 insertions(+), 141 deletions(-)
+
+commit db32b7e5cca4ed5d2e907b81809eb5c8ddb86048
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 17 17:41:57 2009 -0800
+
+    Make computation of sample pattern tile RNG seed for offsets more sensible.
+
+ samplers/bestcandidate.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 9886fd0e3234d9ebec8ec9109a99757508644011
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 17 07:42:06 2009 -0800
+
+    Remove RNG from Sample structure (a bad idea, in retrospect)
+    Re-plumb system to pass RNGs through interfaces that previously got one from a Sample.
+
+ core/integrator.cpp              |   30 +++++++++++++-------------
+ core/integrator.h                |   10 ++++----
+ core/light.cpp                   |    4 +-
+ core/light.h                     |    2 +-
+ core/montecarlo.cpp              |    3 +-
+ core/montecarlo.h                |    2 +-
+ core/renderer.h                  |    5 +--
+ core/sampler.cpp                 |    3 +-
+ core/sampler.h                   |    5 +--
+ core/sh.cpp                      |    4 +-
+ core/volume.h                    |    4 +-
+ integrators/ambientocclusion.cpp |    5 +--
+ integrators/ambientocclusion.h   |    2 +-
+ integrators/diffuseprt.cpp       |    6 ++--
+ integrators/diffuseprt.h         |    2 +-
+ integrators/dipolesubsurface.cpp |   11 +++++----
+ integrators/dipolesubsurface.h   |    2 +-
+ integrators/directlighting.cpp   |   13 ++++++-----
+ integrators/directlighting.h     |    2 +-
+ integrators/emission.cpp         |   10 ++++----
+ integrators/emission.h           |    4 +-
+ integrators/glossyprt.cpp        |    6 ++--
+ integrators/glossyprt.h          |    2 +-
+ integrators/igi.cpp              |   20 +++++++++---------
+ integrators/igi.h                |    2 +-
+ integrators/irradiancecache.cpp  |   41 +++++++++++++++++--------------------
+ integrators/irradiancecache.h    |    8 +++---
+ integrators/path.cpp             |   12 +++++-----
+ integrators/path.h               |    2 +-
+ integrators/photonmap.cpp        |   20 ++++++++----------
+ integrators/photonmap.h          |    6 ++--
+ integrators/single.cpp           |   18 ++++++++--------
+ integrators/single.h             |    4 +-
+ integrators/useprobes.cpp        |    6 ++--
+ integrators/useprobes.h          |    2 +-
+ integrators/whitted.cpp          |   10 ++++----
+ integrators/whitted.h            |    2 +-
+ renderers/aggregatetest.cpp      |    8 +++---
+ renderers/aggregatetest.h        |    4 +-
+ renderers/createprobes.cpp       |   12 +++++-----
+ renderers/createprobes.h         |    4 +-
+ renderers/metropolis.cpp         |   22 ++++++++++----------
+ renderers/metropolis.h           |    4 +-
+ renderers/sample.cpp             |   16 +++++++-------
+ renderers/sample.h               |    4 +-
+ samplers/adaptive.cpp            |    6 ++--
+ samplers/adaptive.h              |    2 +-
+ samplers/bestcandidate.cpp       |   10 ++++----
+ samplers/bestcandidate.h         |    6 ++--
+ samplers/halton.cpp              |   11 ++++-----
+ samplers/halton.h                |    6 +---
+ samplers/lowdiscrepancy.cpp      |    4 +-
+ samplers/lowdiscrepancy.h        |    2 +-
+ samplers/random.cpp              |    6 ++--
+ samplers/random.h                |    3 +-
+ samplers/stratified.cpp          |    3 +-
+ samplers/stratified.h            |    6 +---
+ 57 files changed, 207 insertions(+), 222 deletions(-)
+
+commit ae5589071a535ae3526b37b125fac237cd0249d7
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 17 05:51:22 2009 -0800
+
+    small sampler cleanups
+
+ core/sampler.cpp |   15 ++++-----------
+ core/sampler.h   |    6 +++---
+ 2 files changed, 7 insertions(+), 14 deletions(-)
+
+commit 2eec8f48a6f5af4a959e24ebaac216e4f7012a7b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 17 05:51:08 2009 -0800
+
+    Don't crash when no lights are specified.
+
+ integrators/dipolesubsurface.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7f2211ed7f6aa1820691efdc9ebebaae6412eadf
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 14:33:32 2009 -0800
+
+    win32 build fixes, include prebuilt OpenEXR libs
+
+ core/light.cpp         |    2 +-
+ core/montecarlo.cpp    |    2 +-
+ lights/diffuse.cpp     |   11 +++++------
+ lights/infinite.cpp    |    4 ++--
+ materials/measured.cpp |    2 +-
+ shapes/sphere.cpp      |   11 +++++------
+ 6 files changed, 15 insertions(+), 17 deletions(-)
+
+commit 28a13053259d5f2b56510d5fa3a79ff99ba236d5
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:45:50 2009 -0800
+
+    Change name of SampleRenderer in input syntax to "sample" not "standard".
+
+ core/api.cpp |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d6945d3f4a5186888d2ef6b0a32df533f11990f4
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:45:32 2009 -0800
+
+    Anisotropic microfacet distribution sampling fixes.
+
+ core/reflection.cpp |   21 ++++++++++++++++-----
+ core/reflection.h   |    2 +-
+ 2 files changed, 17 insertions(+), 6 deletions(-)
+
+commit 041168944a8ca24ea5457ac642a71a5a132fcd73
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:45:14 2009 -0800
+
+    Get template magic right so we don't have to store void *s in ImageMap's texture cache.
+
+ textures/imagemap.cpp |    7 +++----
+ textures/imagemap.h   |    6 +++---
+ 2 files changed, 6 insertions(+), 7 deletions(-)
+
+commit cfd065a085f4e98edb030642ae661ccb7c977988
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:44:44 2009 -0800
+
+    Remove precomputed R/pi value in Lambertian BxDF; just recompute it each time it's needed.
+
+ core/reflection.cpp |    2 +-
+ core/reflection.h   |   10 +++-------
+ 2 files changed, 4 insertions(+), 8 deletions(-)
+
+commit ca5e00a36ba395ee2f8acebaab2ecd5ed263b345
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:44:11 2009 -0800
+
+    Add Anisotropic exponent = 10 test.
+
+ tools/bsdftest.cpp |   61 ++++++++++++++++++++++++++++++++-------------------
+ 1 files changed, 38 insertions(+), 23 deletions(-)
+
+commit 3bb55847979362a2ab463c344c0f22e238ae8d69
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:43:58 2009 -0800
+
+    Change GetVolumeScatteringProperties() utility function to return Spectrum values rather than RGBs.
+
+ core/volume.cpp          |   10 ++++------
+ core/volume.h            |    4 ++--
+ materials/subsurface.cpp |    9 +++++----
+ 3 files changed, 11 insertions(+), 12 deletions(-)
+
+commit 1e7d9a103ea55627133b58585663551d7557c18b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:43:28 2009 -0800
+
+    Remove Blinn microfacet distribution sampling routines from separate utility functions, move back into Blinn Microfacet implementation.
+
+ core/montecarlo.cpp |   31 -------------------------------
+ core/montecarlo.h   |    2 --
+ core/reflection.cpp |   28 ++++++++++++++++++++++++----
+ 3 files changed, 24 insertions(+), 37 deletions(-)
+
+commit 4a8a5da1fd8da011f8c6c2f916dcecb5e9c6287d
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 15 10:42:44 2009 -0800
+
+    Minor formatting changes; should be no functional difference.
+
+ core/light.cpp          |    4 +-
+ core/light.h            |    8 ++--
+ core/mipmap.h           |   21 ++++-----
+ core/montecarlo.cpp     |   20 +++------
+ core/montecarlo.h       |    2 +-
+ core/reflection.cpp     |   19 ++++-----
+ core/reflection.h       |   32 ++++++--------
+ core/shape.h            |    5 +-
+ core/spectrum.cpp       |    3 +-
+ core/texture.cpp        |   43 +++++--------------
+ core/texture.h          |   28 ++++++-------
+ core/volume.cpp         |   11 +----
+ core/volume.h           |    8 ++-
+ lights/distant.cpp      |    9 ++--
+ lights/distant.h        |    4 +-
+ lights/point.cpp        |    3 +-
+ lights/point.h          |    4 +-
+ lights/spot.cpp         |    9 ++--
+ lights/spot.h           |    2 +-
+ textures/bilerp.h       |    6 +--
+ textures/checkerboard.h |  106 ++++++++---------------------------------------
+ textures/fbm.h          |    9 +---
+ textures/imagemap.cpp   |    8 ++--
+ textures/marble.h       |   10 +---
+ textures/mix.h          |    7 +--
+ textures/scale.h        |    7 +--
+ textures/windy.h        |    4 +-
+ volumes/exponential.h   |    3 +-
+ volumes/volumegrid.cpp  |    4 +-
+ volumes/volumegrid.h    |    3 +-
+ 30 files changed, 133 insertions(+), 269 deletions(-)
+
+commit 5f58240bbb076820b5ddda4f293c2225e0aeeb54
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 16:04:43 2009 -0800
+
+    Remove RNG from BestCandidateSampler class.
+    Consistently compute Cranley-Patterson rotations for each tile, even across different tasks.
+
+ samplers/bestcandidate.cpp |   11 ++++++-----
+ samplers/bestcandidate.h   |   10 ++++++----
+ 2 files changed, 12 insertions(+), 9 deletions(-)
+
+commit e81059a9f718dc2fd4cde78b9a5dd617bf2515ab
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 15:39:23 2009 -0800
+
+    small cleanups
+
+ core/pbrt.h       |    2 +-
+ core/spectrum.cpp |   12 ++++++------
+ core/spectrum.h   |    4 ++--
+ 3 files changed, 9 insertions(+), 9 deletions(-)
+
+commit f903e060ddd3d369ed4a3f3e08cac83777dfba59
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 15:28:53 2009 -0800
+
+    Don't use memcpy() in ParamSetItem constructor!  (Not good for T==string!)
+
+ core/paramset.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0d1b9ef79b9ff69cc13693b62e9801f1e945f973
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 13:58:23 2009 -0800
+
+    Linux build fix.
+
+ core/spectrum.h |   18 +++++++++++-------
+ 1 files changed, 11 insertions(+), 7 deletions(-)
+
+commit 37afe08d5c3a6bf56a7c004970ab578e2798952b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 11:21:34 2009 -0800
+
+    Move ParamSet macro definitions from .h file to .cpp file.
+    (Only needed privately in the .cpp file.)
+
+ core/paramset.cpp |   20 ++++++++++++++++++++
+ core/paramset.h   |   20 --------------------
+ 2 files changed, 20 insertions(+), 20 deletions(-)
+
+commit 6bcbe76ff2f9cea4a098ebe1b026c6f57b5dabda
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 11:17:43 2009 -0800
+
+    Small code formatting changes, cleanups.  Should be no functional changes.
+
+ core/api.cpp            |   12 ++++------
+ core/kdtree.h           |   17 +++++++--------
+ core/memory.cpp         |    4 +-
+ core/memory.h           |    4 +-
+ core/octree.h           |   52 ++++++++++++++++------------------------------
+ core/parallel.cpp       |   10 ++++----
+ core/parallel.h         |    8 ++----
+ core/paramset.cpp       |    8 +++---
+ core/paramset.h         |    3 +-
+ core/pbrt.h             |    8 ++----
+ core/progressreporter.h |    2 +-
+ core/transform.h        |    3 +-
+ 12 files changed, 53 insertions(+), 78 deletions(-)
+
+commit 69e46e8d6e8931ee7394169f12ce603c1cf4fba5
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 11:14:42 2009 -0800
+
+    Rename WriteRGBAImage() to WriteImage()
+
+ core/imageio.cpp |    2 +-
+ core/imageio.h   |    2 +-
+ core/sh.cpp      |    2 +-
+ film/image.cpp   |    2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+commit ab4e336918046625691fd97d8e70cd7d196a6e57
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Nov 10 11:10:35 2009 -0800
+
+    Removed all usage of u_int, u_char, etc.  Switched over to uint32_t, et al.
+
+ accelerators/bvh.cpp             |   64 ++++++++++++++++----------------
+ accelerators/bvh.h               |   10 ++--
+ accelerators/grid.cpp            |   14 +++---
+ accelerators/grid.h              |    2 +-
+ accelerators/kdtreeaccel.cpp     |   48 ++++++++++++------------
+ accelerators/kdtreeaccel.h       |    4 +-
+ core/api.cpp                     |    2 +-
+ core/imageio.cpp                 |   10 ++--
+ core/integrator.cpp              |    6 +-
+ core/kdtree.h                    |   22 +++++-----
+ core/light.cpp                   |   16 ++++----
+ core/light.h                     |    2 +-
+ core/memory.h                    |   62 +++++++++++++++---------------
+ core/mipmap.h                    |   60 +++++++++++++++---------------
+ core/montecarlo.cpp              |   56 ++++++++++++++--------------
+ core/montecarlo.h                |   54 +++++++++++++-------------
+ core/octree.h                    |    2 +-
+ core/parallel.cpp                |    4 +-
+ core/parallel.h                  |    2 +-
+ core/paramset.cpp                |   28 +++++++-------
+ core/paramset.h                  |    4 +-
+ core/pbrt.h                      |   40 ++++++++-----------
+ core/pbrtparse.yy                |    8 ++--
+ core/primitive.cpp               |    2 +-
+ core/probes.cpp                  |    4 +-
+ core/reflection.cpp              |    2 +-
+ core/reflection.h                |    6 +-
+ core/rng.cpp                     |    2 +-
+ core/rng.h                       |    4 +-
+ core/sampler.cpp                 |    8 ++--
+ core/sampler.h                   |    6 +-
+ core/scene.cpp                   |    2 +-
+ core/sh.cpp                      |   18 ++++----
+ core/transform.h                 |    4 +-
+ core/volume.cpp                  |   20 +++++-----
+ film/image.cpp                   |   14 +++---
+ integrators/ambientocclusion.cpp |    2 +-
+ integrators/dipolesubsurface.cpp |   28 +++++++-------
+ integrators/directlighting.cpp   |    4 +-
+ integrators/igi.cpp              |   12 +++---
+ integrators/igi.h                |    4 +-
+ integrators/irradiancecache.cpp  |    8 ++--
+ integrators/path.cpp             |    2 +-
+ integrators/photonmap.cpp        |   76 +++++++++++++++++++-------------------
+ integrators/photonmap.h          |    4 +-
+ integrators/single.cpp           |    2 +-
+ integrators/useprobes.cpp        |    4 +-
+ integrators/whitted.cpp          |    2 +-
+ materials/measured.cpp           |   12 +++---
+ materials/measured.h             |    2 +-
+ renderers/aggregatetest.cpp      |    6 +-
+ renderers/createprobes.cpp       |   12 +++---
+ renderers/metropolis.cpp         |   18 ++++----
+ renderers/sample.cpp             |    4 +-
+ samplers/bestcandidate.cpp       |    4 +-
+ samplers/bestcandidate.h         |    2 +-
+ samplers/halton.cpp              |    6 +-
+ samplers/halton.h                |    2 +-
+ samplers/random.cpp              |    8 ++--
+ samplers/stratified.cpp          |    4 +-
+ shapes/loopsubdiv.cpp            |   32 ++++++++--------
+ 61 files changed, 433 insertions(+), 439 deletions(-)
+
+commit 2d32121fbb0444bf43af33fd61770bc30ae5bedc
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 17:09:28 2009 -0800
+
+    Stop depositing direct photons when done with indirect photons. (Rather than continuing to store them until indirect and caustic are done.)  Believe
+    that this will fix memory use blowup with dragon caustic scene.
+
+ integrators/photonmap.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 58ec4fb39aea4ad197065007f1cc61d327c23f71
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 15:46:14 2009 -0800
+
+    Implement Keller and Kollig's technique from "Illumination in the Presence
+    of Weak Singularities" to make IGI integrator unbiased (and less crufty.)
+
+ integrators/igi.cpp |   51 ++++++++++++++++++++++++++++++++++++---------------
+ integrators/igi.h   |   10 +++++++---
+ 2 files changed, 43 insertions(+), 18 deletions(-)
+
+commit fa634cefdf0a823635f765c27abd2efb56e25f38
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 15:45:21 2009 -0800
+
+    Clean up Ray transformation code.
+    Initialize hasDifferentials field of returned RayDifferential with value from given one.
+
+ core/transform.h |   16 ++++++----------
+ 1 files changed, 6 insertions(+), 10 deletions(-)
+
+commit 8e72d44bc5819cb607783f97460a5bac7e927b91
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 15:44:35 2009 -0800
+
+    Small code cleanups/reformats.
+
+ core/geometry.h                  |    8 ++------
+ integrators/dipolesubsurface.cpp |    4 ----
+ 2 files changed, 2 insertions(+), 10 deletions(-)
+
+commit 539b593c95a39668f55dba21735ccc9d45077f70
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 15:43:53 2009 -0800
+
+    Small cleanups to Shape implementations.  No functional changes.
+
+ shapes/cone.cpp        |    9 +++------
+ shapes/cylinder.cpp    |   11 ++++-------
+ shapes/cylinder.h      |    4 +---
+ shapes/disk.cpp        |    9 +++------
+ shapes/hyperboloid.cpp |    9 +++------
+ shapes/loopsubdiv.cpp  |   14 ++++----------
+ shapes/paraboloid.cpp  |    9 +++------
+ shapes/sphere.cpp      |    9 +++------
+ 8 files changed, 24 insertions(+), 50 deletions(-)
+
+commit ad2c1f7e25dc12f5233953aef5bfa24c77ee07cf
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 15:43:25 2009 -0800
+
+    Fix bug: don't compute ray differentials for specular reflection/transmission
+    if the incident ray doesn't have ray differentials itself.
+
+ core/integrator.cpp |   67 ++++++++++++++++++++++++++------------------------
+ 1 files changed, 35 insertions(+), 32 deletions(-)
+
+commit d4eb14b7f835d52b7929c1019d71424e84e47acd
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 15:42:44 2009 -0800
+
+    Small camera code cleanups.  No functional changes.
+
+ cameras/orthographic.cpp |   17 +++++++----------
+ cameras/orthographic.h   |    2 +-
+ cameras/perspective.cpp  |   12 ++++--------
+ cameras/perspective.h    |    2 +-
+ core/camera.h            |    2 +-
+ 5 files changed, 14 insertions(+), 21 deletions(-)
+
+commit 9c2e36b173f60cc054a2fa9462993a048cc984a5
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Nov 6 15:42:16 2009 -0800
+
+    Make Triangle::GetUVs() inline
+
+ shapes/trianglemesh.cpp |   17 -----------------
+ shapes/trianglemesh.h   |   16 +++++++++++++++-
+ 2 files changed, 15 insertions(+), 18 deletions(-)
+
+commit fecf5cdd02ebbb0851a3048d69b77ec8f652b872
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Nov 4 06:34:18 2009 -0800
+
+    Add RGB -> Spectrum conversion path with D65 illuminant profile.
+    (Data via lux render).
+    Use it when doing RGB->Spectrum in code for light sources, rather
+      than using reflectance curves.
+
+ core/pbrtparse.yy      |   34 +++---
+ core/spectrum.cpp      |  264 +++++++++++++++++++++++++++++++++++++++--------
+ core/spectrum.h        |   94 ++++++++++++------
+ lights/goniometric.cpp |    3 +-
+ lights/goniometric.h   |    2 +-
+ lights/infinite.cpp    |   11 +-
+ lights/projection.cpp  |    4 +-
+ 7 files changed, 311 insertions(+), 101 deletions(-)
+
+commit 480ac7fa7d660aa05597bb276095b228fabbfadc
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Nov 4 06:33:17 2009 -0800
+
+    Update MetropolisRenderer so that maximum path length (maxDepth)
+    doesn't have any built-in limit.
+
+ renderers/metropolis.cpp |   13 ++++++-------
+ 1 files changed, 6 insertions(+), 7 deletions(-)
+
+commit 346f25181fe00a5ade2ef2e5abf449b7c9916e37
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 2 05:00:31 2009 -0800
+
+    Small code cleanups and variable renamings in
+    camera code and triangle mesh.
+
+ cameras/environment.cpp  |   15 +++------------
+ cameras/environment.h    |    4 +++-
+ cameras/orthographic.cpp |   30 ++++++++++++++----------------
+ cameras/orthographic.h   |    2 +-
+ cameras/perspective.cpp  |   36 +++++++++++++++++-------------------
+ cameras/perspective.h    |    5 +++--
+ core/camera.cpp          |   45 ++++++++++++++++++++++++---------------------
+ core/camera.h            |   15 +++++++--------
+ shapes/trianglemesh.h    |    2 +-
+ 9 files changed, 73 insertions(+), 81 deletions(-)
+
+commit afb0eade7e7d49b08143b1a2392e6d42dc206650
+Author: Matt Pharr <matt@pharr.org>
+Date:   Mon Nov 2 05:00:03 2009 -0800
+
+    Added rudimentary ambient occlusion integrator (for example images)
+
+ core/api.cpp |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit febe0c088adad61aeafcbf45341d729f13aa0185
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sun Nov 1 05:22:43 2009 -0800
+
+    remove include of cameras/realistic.h from core/api.cpp
+
+ core/api.cpp |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit ef457a082ae52884fceb3eacd8b0d3ab9cd02d5f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 31 21:05:15 2009 -0700
+
+    Significantly updated BestCandidateSampler so that it doesn't
+    always start a new instance of the precomputed table at the
+    start of each of the tiles used for parallelization.
+    Rather, conceptually, the entire image plane is tiled with
+    the precomputed tables, and each tile is responsible for
+    figuring out which of the tables overlaps it and then
+    finding the overlapping samples from it.
+
+ samplers/bestcandidate.cpp |   94 +++++--------------------------------------
+ samplers/bestcandidate.h   |   28 +++++++------
+ 2 files changed, 26 insertions(+), 96 deletions(-)
+
+commit 05ebdf79f8debbf1520f03cb3e5c5e8dc0cd7f1c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 31 21:02:41 2009 -0700
+
+    Remove buggy realistic lens system camera implementation.
+
+ core/api.cpp |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit 9cd930f971b70511db2c14e414250b8f29839345
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 31 15:27:21 2009 -0700
+
+    Modify AdaptiveSampler to be able to select between
+    adaptive sampling criteria via a parameter.
+
+ samplers/adaptive.cpp |   22 +++++++++++-----------
+ samplers/adaptive.h   |    5 ++---
+ 2 files changed, 13 insertions(+), 14 deletions(-)
+
+commit f25da56493da062635eb1dc94fb84a0a8d0e92be
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 31 15:26:46 2009 -0700
+
+    Kevin Egan: Pass index of refraction to BSDF constructor
+    Fixes bug that led to specular refraction ray differentials
+    not being computed correctly.
+
+ materials/glass.cpp       |    5 ++---
+ materials/translucent.cpp |    9 +++++----
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+
+commit dc45e8a7b31668469fc26f9569e7c996dec7def2
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 31 15:25:51 2009 -0700
+
+    Rename ShapeId -> shapeId, PrimitiveId -> primitiveId
+    in various structures.
+
+ core/intersection.h |    4 ++--
+ core/primitive.cpp  |    8 ++++----
+ core/primitive.h    |    6 +++---
+ core/shape.cpp      |    4 ++--
+ core/shape.h        |    4 ++--
+ 5 files changed, 13 insertions(+), 13 deletions(-)
+
+commit 5e87a5d4dd9514e4107a8d3f30340a492374a454
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 31 15:23:27 2009 -0700
+
+    Small cleanups to Film interface and ImageFilm implementations.
+    No functionality changes.
+
+ core/film.cpp  |    3 +-
+ core/film.h    |   13 ++++------
+ film/image.cpp |   68 +++++++++++++++++++++++++++----------------------------
+ film/image.h   |   17 +++++--------
+ 4 files changed, 47 insertions(+), 54 deletions(-)
+
+commit b11dcd2f886bfe00bceb4e61378ab38822b01c2e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Sat Oct 31 15:22:53 2009 -0700
+
+    Small cleanups / reorg to Filter implementations.
+
+ filters/mitchell.h   |    5 +++--
+ filters/sinc.cpp     |   11 -----------
+ filters/sinc.h       |   16 ++++++++++++----
+ filters/triangle.cpp |    2 +-
+ 4 files changed, 16 insertions(+), 18 deletions(-)
+
+commit 23f804cf84b36be96c1a237cb5d884ae7b06fd14
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 29 20:25:52 2009 -0700
+
+    rename fields in Sampler and Intersection structures (ImageX -> imageX, etc)
+
+ cameras/environment.cpp          |    6 ++--
+ cameras/orthographic.cpp         |   18 ++++++------
+ cameras/perspective.cpp          |   12 ++++----
+ cameras/realistic.cpp            |    8 +++---
+ core/api.cpp                     |    2 +-
+ core/camera.cpp                  |    8 +++---
+ core/camera.h                    |    2 +-
+ core/integrator.cpp              |   16 ++++-------
+ core/intersection.h              |    4 +-
+ core/primitive.cpp               |    2 +-
+ core/sampler.cpp                 |   54 +++++++++++++++++++------------------
+ core/sampler.h                   |   20 ++++++-------
+ core/sh.cpp                      |    4 +-
+ film/image.cpp                   |   18 ++++++------
+ integrators/diffuseprt.cpp       |    4 +-
+ integrators/dipolesubsurface.cpp |   12 ++++----
+ integrators/directlighting.cpp   |    4 +-
+ integrators/glossyprt.cpp        |    4 +-
+ integrators/igi.cpp              |   10 +++---
+ integrators/irradiancecache.cpp  |   16 +++++-----
+ integrators/path.cpp             |    6 ++--
+ integrators/photonmap.cpp        |   10 +++---
+ integrators/useprobes.cpp        |    2 +-
+ integrators/whitted.cpp          |    4 +-
+ renderers/aggregatetest.cpp      |    2 +-
+ renderers/createprobes.cpp       |    4 +-
+ renderers/metropolis.cpp         |   32 +++++++++++-----------
+ renderers/sample.cpp             |    4 +-
+ samplers/bestcandidate.cpp       |   26 +++++++++---------
+ samplers/bestcandidate.h         |    3 +-
+ samplers/halton.cpp              |   29 ++++++++++----------
+ samplers/lowdiscrepancy.cpp      |   15 ++++------
+ samplers/lowdiscrepancy.h        |    2 +-
+ samplers/random.cpp              |   17 ++++++-----
+ samplers/stratified.cpp          |   41 ++++++++++++++--------------
+ 35 files changed, 208 insertions(+), 213 deletions(-)
+
+commit 71d468bc3b9ce498ab03f6ee85c99b2c035a6209
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 29 20:25:23 2009 -0700
+
+    small indent, naming fixes
+
+ core/diffgeom.cpp       |   12 +++---------
+ core/material.cpp       |    4 ++--
+ core/mipmap.h           |   11 +++++------
+ core/texture.cpp        |   20 +++++---------------
+ core/texture.h          |   12 ++++++++----
+ core/transform.cpp      |    8 ++++----
+ core/transform.h        |    2 +-
+ shapes/trianglemesh.cpp |    2 +-
+ 8 files changed, 29 insertions(+), 42 deletions(-)
+
+commit b1a989cb95fcd1a8712c7cba1bacedb0dcaf85b1
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 29 20:25:19 2009 -0700
+
+    small textures cleanups
+
+ textures/bilerp.h       |   11 +++--------
+ textures/checkerboard.h |   33 +++++++++++++++++----------------
+ textures/dots.h         |   10 ++++------
+ textures/imagemap.cpp   |    6 ++++--
+ textures/imagemap.h     |    6 ++++--
+ textures/mix.h          |    3 +--
+ 6 files changed, 33 insertions(+), 36 deletions(-)
+
+commit 12c2a4f1faa8cecace61167e84aa4951f5341ed3
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 29 20:24:23 2009 -0700
+
+    adaptive sampler cleanups, generalizations
+
+ samplers/adaptive.cpp |   78 +++++++++++++++++++++++++++++--------------------
+ samplers/adaptive.h   |   11 ++++---
+ 2 files changed, 52 insertions(+), 37 deletions(-)
+
+commit eef0e35b8a0ac9468aa5cd98ab3fb0b336cb190c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 29 20:23:42 2009 -0700
+
+    measured material cleanups
+
+ materials/measured.cpp |   21 +++++++++------------
+ materials/measured.h   |    3 ++-
+ 2 files changed, 11 insertions(+), 13 deletions(-)
+
+commit 8c1d9d5fd08ea7244decb2dd526f5ac2eb16d598
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 29 20:21:58 2009 -0700
+
+    increase max specular exponent to 10000
+
+ core/reflection.h |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 41cb068515c736d891948db9bcaf83fcbc584b83
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 29 20:21:29 2009 -0700
+
+    small Monte Carlo cleanups
+
+ core/montecarlo.cpp |  308 ++++++++++++++++++++++++---------------------------
+ core/montecarlo.h   |   62 +++++------
+ 2 files changed, 172 insertions(+), 198 deletions(-)
+
+commit 7419f34b225236b1fddfa1c416599437c890113e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Thu Oct 22 19:59:12 2009 -0700
+
+    Measured BRDF code cleanups (formatting and type/variable names)
+    Small general Material cleanups
+
+ core/intersection.cpp  |    2 +-
+ core/material.h        |    4 +-
+ core/reflection.cpp    |   67 +++++++++++++++++++----------------------------
+ core/reflection.h      |   29 ++++++++++----------
+ materials/matte.cpp    |    4 +-
+ materials/matte.h      |    8 ++---
+ materials/measured.cpp |   24 +++++++++--------
+ materials/measured.h   |    2 +-
+ materials/mixmat.cpp   |    4 +-
+ materials/mixmat.h     |    8 ++---
+ materials/plastic.cpp  |    8 +++---
+ materials/plastic.h    |    7 +---
+ 12 files changed, 74 insertions(+), 93 deletions(-)
+
+commit 2d897f6c32d63c5eaa699d12d8b9bd2b56d093e3
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 20 05:55:37 2009 -0700
+
+    Update bsdf test for bsdf changes.
+
+ tools/bsdftest.cpp |   37 +++++++++----------------------------
+ 1 files changed, 9 insertions(+), 28 deletions(-)
+
+commit 18ad067ceceab65d9d185bb4945d7759009848a1
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 20 05:55:15 2009 -0700
+
+    Fix bug in InfiniteAreaLight::Sample_L() that returned infinite pdf when
+    the second light sample value was exactly zero.
+
+ lights/infinite.cpp |   10 +++++++---
+ 1 files changed, 7 insertions(+), 3 deletions(-)
+
+commit d3d50f0cb0fa0dec6ca4fd24a53e31f3684f71c1
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 20 05:54:39 2009 -0700
+
+    Fixed RNG so that UniformFloat() actually returns values in [0,1), not [0,1]
+
+ core/rng.cpp |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 6fe0ddca62479f806f3ed22f8161660769cc5682
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 20 05:53:37 2009 -0700
+
+    Renamed/reorganized some of the measured BRDF code.
+
+ core/reflection.cpp    |  109 +++++++++++++++++++++---------------------------
+ core/reflection.h      |   39 ++++++++---------
+ materials/measured.cpp |   37 ++++++++--------
+ materials/measured.h   |    5 +-
+ 4 files changed, 86 insertions(+), 104 deletions(-)
+
+commit 48938def2c76a51a9f0ddebab63c45a091065f59
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 13:20:47 2009 -0700
+
+    John Danks: print number of cores detected in startup message
+
+ main/pbrt.cpp |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit f0163922b63c54394a2688cb56a61f2c8fffe072
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 13:20:29 2009 -0700
+
+    John Danks: fix errors in README_BUILDING.txt file, add some more details.
+
+ README_BUILDING.txt |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+commit 91f6e3d806906eb2c30e0836800ebf77476782cf
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:57:54 2009 -0700
+
+    Reworked Light::Sample_L() routines to take a time sample value, eliminated
+      clunky need to pass time in to the VisibilityTester methods.
+    Small tweaks to BSSRDF class.
+
+ core/integrator.cpp              |    6 +++---
+ core/light.cpp                   |   21 ++++++++++-----------
+ core/light.h                     |   18 +++++++++---------
+ core/reflection.h                |    9 ++++-----
+ integrators/dipolesubsurface.cpp |   12 ++++++------
+ integrators/igi.cpp              |    3 ++-
+ integrators/photonmap.cpp        |   13 +++++++------
+ integrators/single.cpp           |    6 +++---
+ integrators/whitted.cpp          |    6 +++---
+ lights/diffuse.cpp               |   11 +++++------
+ lights/diffuse.h                 |   11 +++++------
+ lights/distant.cpp               |   10 +++++-----
+ lights/distant.h                 |    4 ++--
+ lights/goniometric.cpp           |   10 ++++------
+ lights/goniometric.h             |    4 ++--
+ lights/infinite.cpp              |   24 +++++++++++-------------
+ lights/infinite.h                |    4 ++--
+ lights/point.cpp                 |   13 ++++++-------
+ lights/point.h                   |    4 ++--
+ lights/projection.cpp            |    9 ++++-----
+ lights/projection.h              |    4 ++--
+ lights/spot.cpp                  |    9 ++++-----
+ lights/spot.h                    |    4 ++--
+ volumes/homogeneous.h            |    3 +--
+ 24 files changed, 104 insertions(+), 114 deletions(-)
+
+commit 3f51115d6e34753160bac61409b131440c4d1226
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:57:22 2009 -0700
+
+    Rename "index" member variables in subsurface materials to "eta".
+
+ materials/kdsubsurface.cpp |   10 +++++-----
+ materials/kdsubsurface.h   |    6 +++---
+ materials/subsurface.cpp   |   14 ++++++--------
+ materials/subsurface.h     |   10 +++++-----
+ 4 files changed, 19 insertions(+), 21 deletions(-)
+
+commit 422f504798ee0a4aa0ff2c4c216b1a56bb17a742
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:56:48 2009 -0700
+
+    (John Danks): fix build when PBRT_STATS_COUNTERS is defined.
+
+ core/probes.cpp |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit c5e4097856dcddc290aaed01a2f14c7491c4118e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:54:40 2009 -0700
+
+    Fixed up comments in #defines.
+
+ core/imageio.cpp |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 62e56c429d2a10409797e51df9734f750182697a
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:54:08 2009 -0700
+
+    Added "gamma" and "scale" parameters to ImageTexture to adjust texel data
+      before use.
+
+ textures/imagemap.cpp |   22 +++++++++++++---------
+ textures/imagemap.h   |   24 ++++++++++++------------
+ 2 files changed, 25 insertions(+), 21 deletions(-)
+
+commit 4a79c260a336f3a04d2276236824c6b37b60f953
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:53:56 2009 -0700
+
+    Add Pow() method to Spectrum class.
+
+ core/spectrum.h |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit 0939ac580497f93235cf9338b6325ec80cf5f628
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:52:55 2009 -0700
+
+    Remove (unused) TURNG random number generator.
+
+ core/rng.cpp |    6 ++--
+ core/rng.h   |  105 +--------------------------------------------------------
+ 2 files changed, 5 insertions(+), 106 deletions(-)
+
+commit f15ef10c7bd0aaccb91f71c0ba6962042c706537
+Author: Matt Pharr <matt@pharr.org>
+Date:   Fri Oct 16 10:52:08 2009 -0700
+
+    (Asbjørn Heid): fix RandomSampler to just take nsamples parameter, not
+      (meaningless) separate xsamples and y samples parameters.
+
+ samplers/random.cpp |   46 ++++++++++++++++------------------------------
+ samplers/random.h   |    4 ++--
+ 2 files changed, 18 insertions(+), 32 deletions(-)
+
+commit b69083cb75bb5bb946dabd2252103eaddb670772
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 13 10:51:27 2009 -0700
+
+    s/__OPENBSD__/__OpenBSD__/ in #ifdef (John Danks)
+
+ core/parallel.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d0df928330b8b0595f635b89dfe836f40f7b9de6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 13 08:13:38 2009 -0700
+
+    OpenBSD build fixes from John Danks
+    Switched to using hw.logicalcpu to decide how many threads to launch with
+      OSX; this should give a more appropriate result for Nehalem-like CPUs
+      with SMT.
+
+ Makefile          |   15 +++++++++++++--
+ core/parallel.cpp |   16 +++++++++++++++-
+ 2 files changed, 28 insertions(+), 3 deletions(-)
+
+commit c7fa2400383da3570e18d3b55a7ad999ee7eabc6
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 13 07:37:51 2009 -0700
+
+    Danks: use unnamedJohn  semaphores on OpenBSD, which doesn support named
+    semaphores.
+
+ core/parallel.cpp |   17 +++++++++++++++++
+ 1 files changed, 17 insertions(+), 0 deletions(-)
+
+commit 922bbf2c3f0c2937217068f8ab9576321a53d664
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 13 07:32:04 2009 -0700
+
+    John Danks: Avoid division by zero NaN by computing the denominator first
+    in Anisotropic::D() and return 0 if denominator is zero.
+
+ core/reflection.h |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit b6131cb5b7623292388a4c48df48f44f29c83201
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 13 07:25:37 2009 -0700
+
+    Added Distribution2D class
+    Fixed bug with PDF computation when sampling from joint 2D distributions.
+    More widespread use of Distribution1D and Distribution2D classes where
+      appropriate.
+    Small code formatting changes due to book text edits.
+
+ Makefile                  |    2 +-
+ core/integrator.cpp       |   23 ++-------
+ core/integrator.h         |    5 +--
+ core/light.cpp            |   31 +++++++-----
+ core/light.h              |    8 ++-
+ core/montecarlo.cpp       |   55 +++++++++------------
+ core/montecarlo.h         |  115 +++++++++++++++++++++++++++++++--------------
+ core/pbrt.h               |    3 +-
+ core/reflection.h         |    7 ++-
+ core/volume.cpp           |    9 +--
+ core/volume.h             |    4 +-
+ integrators/igi.cpp       |    8 +--
+ integrators/photonmap.cpp |   18 ++-----
+ lights/infinite.cpp       |   88 +++++++++++-----------------------
+ lights/infinite.h         |   11 ++--
+ volumes/volumegrid.cpp    |   12 -----
+ volumes/volumegrid.h      |    9 +++-
+ 17 files changed, 195 insertions(+), 213 deletions(-)
+
+commit 102d0bc42053b7d667979f424a5b638954e9886a
+Author: Matt Pharr <matt@pharr.org>
+Date:   Tue Oct 13 07:19:52 2009 -0700
+
+    fix github link in README.txt
+
+ README.txt |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+commit dc48e890bf6a7f70b44c5e021bd20459e5b0044f
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 20:17:14 2009 -0700
+
+    ShapeSet cleanups
+
+ core/light.cpp |   28 +++++++++++-----------------
+ core/light.h   |    2 +-
+ 2 files changed, 12 insertions(+), 18 deletions(-)
+
+commit 99fd3e164bb0fd028c49e7a2f94203d156b8124c
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 20:16:51 2009 -0700
+
+    Small cleanups to DiffuseAreaLight::Sample_L() implementation.
+
+ lights/diffuse.cpp |   18 +++++++++---------
+ 1 files changed, 9 insertions(+), 9 deletions(-)
+
+commit fd2b591d9f6803aef5765a867579b2a0f3107443
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 15:41:37 2009 -0700
+
+    Fix missed bits from removal of Light::Sample_L() variant
+
+ core/integrator.cpp              |    2 +-
+ core/light.h                     |    9 ---------
+ integrators/dipolesubsurface.cpp |    2 +-
+ lights/diffuse.cpp               |   21 ++-------------------
+ lights/diffuse.h                 |    3 ---
+ 5 files changed, 4 insertions(+), 33 deletions(-)
+
+commit 40b30c70318738b0ce4345066860afa4f591db62
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 15:34:04 2009 -0700
+
+    Remove Light::Sample_L() variant that took surface normal at point being
+    shaded; no code paths ever actually used it.
+
+ core/integrator.cpp |    6 +++---
+ core/light.cpp      |    2 +-
+ core/light.h        |    9 ++++-----
+ core/montecarlo.cpp |    2 +-
+ core/reflection.cpp |    2 +-
+ lights/diffuse.cpp  |    4 ++--
+ lights/distant.cpp  |    3 +--
+ lights/point.cpp    |    3 +--
+ lights/spot.cpp     |    5 ++---
+ 9 files changed, 16 insertions(+), 20 deletions(-)
+
+commit e98208d15b5fc1ba3a2dd4db7ccf48bcd5a2cb00
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 15:33:50 2009 -0700
+
+    Reduce number of samples for ss-envmap scene.
+
+ scenes/ss-envmap.pbrt |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c7395980fe978e58965ebb35f2e58cadad18b24e
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 15:33:12 2009 -0700
+
+    Fix makefile to create bin/ and objs/ directories if not present.
+    (Otherwise fresh checkout and build fails.)
+
+ Makefile |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit cf8e3b1c0afcad2d85e8663ed8d9a39be392604b
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 12:43:21 2009 -0700
+
+    More small build fixes.  Switched to explicit 32-bit builds on all
+    unix-y platforms as a more portable baseline.
+
+ Makefile |   21 ++++++++++-----------
+ 1 files changed, 10 insertions(+), 11 deletions(-)
+
+commit 0c62206dfb26edc05f77453b80513f9ec652c5c7
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 12:11:26 2009 -0700
+
+    More win32 build fixes
+
+ core/pbrtlex.ll |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit e01a81d2beef7fb43b4574cb96aefbd9e5fe2527
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 12:10:10 2009 -0700
+
+    Rename materials/mix.* to materials/mixmat.* to make win32 build happy:
+    conflict with textures/mix.* was causing the .obj file to be clobbered.
+
+ core/api.cpp |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit cb034cf7ea2e8eceae836241104cb4789fdba6d3
+Author: Matt Pharr <matt@pharr.org>
+Date:   Wed Oct 7 11:19:57 2009 -0700
+
+    win32 build fix
+
+ core/parallel.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)

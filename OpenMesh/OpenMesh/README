@@ -1,0 +1,9 @@
+OpenMesh, 1-9-6
+~~~~~~~~~~~~~~~
+
+0. Licence
+   see LICENSE
+   
+2. Installing
+~~~~~~~~~~~~~~
+Unpack the tar-ball to a suitable place and compile with acgmake.

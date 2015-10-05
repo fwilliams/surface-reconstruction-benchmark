@@ -1,0 +1,79 @@
+CC = gcc
+CXX = g++
+# CC = icc
+# CXX = icpc
+
+ARCH := $(shell uname -m)
+ARCH := $(patsubst i%86,i386,$(ARCH))
+SUB_ARCH := $(shell ../scripts/detect_arch.pl)
+
+OBJDIR = ../OBJ.Linux_$(SUB_ARCH)
+
+# icc doesn't support AMD processors
+ifeq ($(SUB_ARCH), opetron)
+  CC := gcc
+  CXX := g++
+endif
+
+# Now define COPTS
+ifeq ($(CC), icc)
+  ifdef DEBUG
+    COPTS = -Wall -cxxlib-gcc -g -O0 -vec_report0 -wd1418,858,981,271,1419,810,383,191,1572,279,522,444,869,175,424
+  else
+     -Wall -cxxlib-gcc -O3 -xBN -static-libcxa -vec_report0 -wd1418,858,981,271,1419,810,383,191,1572,279,522,444,869,177,175,424
+  endif
+else # gcc
+  ifdef DEBUG
+    COPTS =  -Wall -W -Wno-write-strings -Wno-non-virtual-dtor -Wno-empty-body -g -ggdb3 -fno-strict-aliasing -fopenmp
+  else
+    ifeq ($(SUB_ARCH), sse2)
+      COPTS = -march=pentium4 -mfpmath=sse -msse2 -fopenmp
+    else
+      COPTS = -march=native -fopenmp
+      ifeq ($(SUB_ARCH), pentium-m)
+        COPTS += -mfpmath=sse -msse2
+      endif
+    endif
+
+    COPTS += -Wall -W -Wno-unused-parameter -Wno-write-strings -Wno-empty-body -O3 -fno-strict-aliasing
+  endif
+endif
+
+ifeq ($(ARCH),i386)
+	XLIBDIR = /usr/X11R6/lib
+endif
+
+ifeq ($(ARCH),x86_64)
+	XLIBDIR = /usr/X11R6/lib64
+endif
+
+CXXOPTS = $(COPTS) -Wno-non-virtual-dtor
+
+CFLAGS = $(INCLUDES) $(DEFINES) $(COPTS)
+CXXFLAGS = $(INCLUDES) $(DEFINES) $(CXXOPTS)
+LDFLAGS = $(LIBDIR) $(LDOPTS)
+
+LIBS = $(DEPLIBS) -lm -lpthread
+XLIBS = -L$(XLIBDIR) -lglut -lGL -lGLU -lX11 -lXi -lXmu
+#GLUI_LIBS = -L../../glui-2.35/src/lib -lglui
+GLUI_LIBS = ../../trimesh2/lib.$(TRIMESH_UNAME)/libgluit.a
+
+
+$(OBJDIR)/%.o: %.c $(MAKEFILE_DEPS)
+	@ echo "Compiling $<"
+	@ rm -f "$(@:.o=.d)" && env DEPENDENCIES_OUTPUT="$(@:.o=.d) $@" $(CC) $(CFLAGS) -c $< -o $(OBJDIR)/$@
+
+$(OBJDIR)/%.o: %.cc $(MAKEFILE_DEPS)
+	@ echo "Compiling $<"
+	@ rm -f "$(@:.o=.d)" && env DEPENDENCIES_OUTPUT="$(OBJDIR)/$(@:.o=.d) $@" $(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
+
+
+define LINK
+	@ echo "Linking $@"
+	@ rm -f $@
+	@ $(CXX) $(CXXFLAGS) -o $@ $(OBJDIR)/$(notdir $@).o $(LDFLAGS) $(LIBS)
+endef
+
+first_rule: all
+
+-include $(OBJDIR)/*.d

@@ -1,0 +1,8 @@
+words=$(\ls corr*.txt | wc -w)
+echo $words $words > global_in.txt
+\ls ../*.ply >> global_in.txt
+\ls corr*.txt >> global_in.txt
+
+rm -rf points rigid nonrigid affine *.ply
+mkdir points rigid nonrigid affine
+(time global_reg -nthreads 2 -r rigid/ -nr nonrigid/ $* < global_in.txt > global_out.txt) >& global_err.txt
