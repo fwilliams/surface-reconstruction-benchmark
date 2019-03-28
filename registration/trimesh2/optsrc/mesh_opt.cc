@@ -11,13 +11,14 @@
 #include <cstdio> 
 #include <vector> 
 #include <cstdarg> 
+#include <cstring>
 
 #include "cholmod.h"
 #include "TriMesh.h"
 #include "TriMesh_algo.h"
 
 // CHOLMOD error handler
-static void handler(int status, char *file, int line, char *message) {
+static void handler(int status, const char *file, int line, const char *message) {
     fprintf(stderr, "\ncholmod error: file: %s line: %d status: %d: %s\n\n",
         file, line, status, message);
     exit(1);

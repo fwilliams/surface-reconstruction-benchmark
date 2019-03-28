@@ -104,7 +104,7 @@ public:
     refcount_fnormals_(0),
     refcount_fcolors_(0)
   {
-    add_property( points_, "v:points" );
+    this->add_property( points_, "v:points" );
 
     if (VAttribs & Attributes::Normal)
       request_vertex_normals();
@@ -149,10 +149,10 @@ public:
       Connectivity::request_face_status();
     //FIXME: data properties might actually cost storage even 
     //if there are no data traits??
-    add_property(data_vpph_);
-    add_property(data_fpph_);
-    add_property(data_hpph_);
-    add_property(data_epph_);
+    this->add_property(data_vpph_);
+    this->add_property(data_fpph_);
+    this->add_property(data_hpph_);
+    this->add_property(data_epph_);
   }
 
   virtual ~AttribKernelT()
@@ -225,213 +225,213 @@ public:
     for (typename Connectivity::VertexIter v_it = Connectivity::vertices_begin(); 
          v_it != Connectivity::vertices_end(); ++v_it)
     {//assumes Point constructor supports cast from _AttribKernel::Point
-      set_point(v_it, (Point)_other.point(v_it));
+      this->set_point(v_it, (Point)_other.point(v_it));
     }    
   }
 
   //-------------------------------------------------------------------- points
 
   const Point* points() const 
-  { return property(points_).data(); }
+  { return this->property(points_).data(); }
 
   const Point& point(VertexHandle _vh) const 
-  { return property(points_, _vh); }
+  { return this->property(points_, _vh); }
 
   Point& point(VertexHandle _vh) 
-  { return property(points_, _vh); }
+  { return this->property(points_, _vh); }
 
   void set_point(VertexHandle _vh, const Point& _p) 
-  { property(points_, _vh) = _p; }
+  { this->property(points_, _vh) = _p; }
 
 
   //------------------------------------------------------------ vertex normals
 
   const Normal* vertex_normals() const 
-  { return property(vertex_normals_).data(); }
+  { return this->property(vertex_normals_).data(); }
 
   const Normal& normal(VertexHandle _vh) const 
-  { return property(vertex_normals_, _vh); }
+  { return this->property(vertex_normals_, _vh); }
 
   void set_normal(VertexHandle _vh, const Normal& _n) 
-  { property(vertex_normals_, _vh) = _n; }
+  { this->property(vertex_normals_, _vh) = _n; }
 
 
   //------------------------------------------------------------- vertex colors
 
   const Color* vertex_colors() const 
-  { return property(vertex_colors_).data(); }
+  { return this->property(vertex_colors_).data(); }
 
   const Color& color(VertexHandle _vh) const
-  { return property(vertex_colors_, _vh); }
+  { return this->property(vertex_colors_, _vh); }
 
   void set_color(VertexHandle _vh, const Color& _c) 
-  { property(vertex_colors_, _vh) = _c; }
+  { this->property(vertex_colors_, _vh) = _c; }
 
 
   //------------------------------------------------------- vertex 1D texcoords
 
   const TexCoord1D* texcoords1D() const {
-    return property(vertex_texcoords1D_).data();
+    return this->property(vertex_texcoords1D_).data();
   }
 
   const TexCoord1D& texcoord1D(VertexHandle _vh) const {
-    return property(vertex_texcoords1D_, _vh);
+    return this->property(vertex_texcoords1D_, _vh);
   }
 
   void set_texcoord1D(VertexHandle _vh, const TexCoord1D& _t) {
-    property(vertex_texcoords1D_, _vh) = _t;
+    this->property(vertex_texcoords1D_, _vh) = _t;
   }
 
 
   //------------------------------------------------------- vertex 2D texcoords
 
   const TexCoord2D* texcoords2D() const {
-    return property(vertex_texcoords2D_).data();
+    return this->property(vertex_texcoords2D_).data();
   }
 
   const TexCoord2D& texcoord2D(VertexHandle _vh) const {
-    return property(vertex_texcoords2D_, _vh);
+    return this->property(vertex_texcoords2D_, _vh);
   }
 
   void set_texcoord2D(VertexHandle _vh, const TexCoord2D& _t) {
-    property(vertex_texcoords2D_, _vh) = _t;
+    this->property(vertex_texcoords2D_, _vh) = _t;
   }
 
 
   //------------------------------------------------------- vertex 3D texcoords
 
   const TexCoord3D* texcoords3D() const {
-    return property(vertex_texcoords3D_).data();
+    return this->property(vertex_texcoords3D_).data();
   }
 
   const TexCoord3D& texcoord3D(VertexHandle _vh) const {
-    return property(vertex_texcoords3D_, _vh);
+    return this->property(vertex_texcoords3D_, _vh);
   }
 
   void set_texcoord3D(VertexHandle _vh, const TexCoord3D& _t) {
-    property(vertex_texcoords3D_, _vh) = _t;
+    this->property(vertex_texcoords3D_, _vh) = _t;
   }
  
   //.------------------------------------------------------ halfedge 1D texcoords
   
   const TexCoord1D* htexcoords1D() const {
-    return property(halfedge_texcoords1D_).data();
+    return this->property(halfedge_texcoords1D_).data();
   }
 
   const TexCoord1D& texcoord1D(HalfedgeHandle _heh) const {
-    return property(halfedge_texcoords1D_, _heh);
+    return this->property(halfedge_texcoords1D_, _heh);
   }
 
   void set_texcoord1D(HalfedgeHandle _heh, const TexCoord1D& _t) {
-    property(halfedge_texcoords1D_, _heh) = _t;
+    this->property(halfedge_texcoords1D_, _heh) = _t;
   }
 
 
   //------------------------------------------------------- halfedge 2D texcoords
 
   const TexCoord2D* htexcoords2D() const {
-    return property(halfedge_texcoords2D_).data();
+    return this->property(halfedge_texcoords2D_).data();
   }
 
   const TexCoord2D& texcoord2D(HalfedgeHandle _heh) const {
-    return property(halfedge_texcoords2D_, _heh);
+    return this->property(halfedge_texcoords2D_, _heh);
   }
 
   void set_texcoord2D(HalfedgeHandle _heh, const TexCoord2D& _t) {
-    property(halfedge_texcoords2D_, _heh) = _t;
+    this->property(halfedge_texcoords2D_, _heh) = _t;
   }
 
 
   //------------------------------------------------------- halfedge 3D texcoords
 
   const TexCoord3D* htexcoords3D() const {
-    return property(halfedge_texcoords3D_).data();
+    return this->property(halfedge_texcoords3D_).data();
   }
 
   const TexCoord3D& texcoord3D(HalfedgeHandle _heh) const {
-    return property(halfedge_texcoords3D_, _heh);
+    return this->property(halfedge_texcoords3D_, _heh);
   }
 
   void set_texcoord3D(HalfedgeHandle _heh, const TexCoord3D& _t) {
-    property(halfedge_texcoords3D_, _heh) = _t;
+    this->property(halfedge_texcoords3D_, _heh) = _t;
   }
   
   //-------------------------------------------------------------- face normals
 
   const Normal& normal(FaceHandle _fh) const 
-  { return property(face_normals_, _fh); }
+  { return this->property(face_normals_, _fh); }
 
   void set_normal(FaceHandle _fh, const Normal& _n) 
-  { property(face_normals_, _fh) = _n; }
+  { this->property(face_normals_, _fh) = _n; }
 
   //--------------------------------------------------------------- face colors
 
   const Color& color(FaceHandle _fh) const
-  { return property(face_colors_, _fh); }
+  { return this->property(face_colors_, _fh); }
 
   void set_color(FaceHandle _fh, const Color& _c)
-  { property(face_colors_, _fh) = _c; }
+  { this->property(face_colors_, _fh) = _c; }
 
   //------------------------------------------------ request / alloc properties
 
   void request_vertex_normals()
   {
     if (!refcount_vnormals_++)
-      add_property( vertex_normals_, "v:normals" );
+      this->add_property( vertex_normals_, "v:normals" );
   }
 
   void request_vertex_colors()
   {
     if (!refcount_vcolors_++)
-      add_property( vertex_colors_, "v:colors" );
+      this->add_property( vertex_colors_, "v:colors" );
   }
 
   void request_vertex_texcoords1D() 
   {
     if (!refcount_vtexcoords1D_++)
-      add_property( vertex_texcoords1D_, "v:texcoords1D" );
+      this->add_property( vertex_texcoords1D_, "v:texcoords1D" );
   }
 
   void request_vertex_texcoords2D() 
   {
     if (!refcount_vtexcoords2D_++)
-      add_property( vertex_texcoords2D_, "v:texcoords2D" );
+      this->add_property( vertex_texcoords2D_, "v:texcoords2D" );
   }
 
   void request_vertex_texcoords3D() 
   {
     if (!refcount_vtexcoords3D_++)
-      add_property( vertex_texcoords3D_, "v:texcoords3D" );
+      this->add_property( vertex_texcoords3D_, "v:texcoords3D" );
   }
 
   void request_halfedge_texcoords1D() 
   {
     if (!refcount_htexcoords1D_++)
-      add_property( halfedge_texcoords1D_, "h:texcoords1D" );
+      this->add_property( halfedge_texcoords1D_, "h:texcoords1D" );
   }
 
   void request_halfedge_texcoords2D() 
   {
     if (!refcount_htexcoords2D_++)
-      add_property( halfedge_texcoords2D_, "h:texcoords2D" );
+      this->add_property( halfedge_texcoords2D_, "h:texcoords2D" );
   }
 
   void request_halfedge_texcoords3D() 
   {
     if (!refcount_htexcoords3D_++)
-      add_property( halfedge_texcoords3D_, "h:texcoords3D" );
+      this->add_property( halfedge_texcoords3D_, "h:texcoords3D" );
   }
 
   void request_face_normals()
   {
     if (!refcount_fnormals_++)
-      add_property( face_normals_, "f:normals" );
+      this->add_property( face_normals_, "f:normals" );
   }
 
   void request_face_colors()
   {
     if (!refcount_fcolors_++)
-      add_property( face_colors_, "f:colors" );
+      this->add_property( face_colors_, "f:colors" );
   }
 
   //------------------------------------------------- release / free properties

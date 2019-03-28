@@ -97,6 +97,7 @@ void ImplicitSampler::sample(Vector3* points, int* tris)  {
 		for(unsigned s = 0; s < new_samples.size(); s++)
 			update_samples(new_samples[s], uniform_grid);
 
+		// total_energy /= num_points;
 		timer.end();
 		cout << timer.getComputation() << " : " << timer.getElapsedTime() << "s energy: " << total_energy << endl;
 

@@ -83,7 +83,7 @@ void MeshSampler::sample(Vector3* points, int* tris)  {
 			uniform_grid->add_point(GridPoint(sampled_pts[s].pt,s));
 		}
 
-		int periodicity = num_points/10;
+		int periodicity = std::max(1, num_points/10);
 
 		vector<SamplerPoint> new_samples;
 		ComputationTimer timer("relaxation");

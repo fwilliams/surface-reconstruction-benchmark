@@ -45,7 +45,7 @@
 #   define  TARGET_HOST_WIN32       1
 #   define  TARGET_HOST_WINCE       0
 #else
-#   define  TARGET_HOST_UNIX_X11    1
+#   define  TARGET_HOST_UNIX_X11    0
 #   define  TARGET_HOST_WIN32       0
 #   define  TARGET_HOST_WINCE       0
 #endif
@@ -69,8 +69,13 @@
 /*
  * Those files should be available on every platform.
  */
+#if __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -86,7 +91,11 @@
  * The system-dependant include files should go here:
  */
 #if TARGET_HOST_UNIX_X11
-    #include <GL/glx.h>
+#if __APPLE__
+#include <OpenGL/glext.h>
+#else
+#include <GL/glx.h>
+#endif
     #include <X11/Xlib.h>
     #include <X11/Xatom.h>
     #include <X11/keysym.h>

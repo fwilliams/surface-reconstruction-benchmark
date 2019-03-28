@@ -21,12 +21,8 @@
 
  */
 
-#if defined(_MSC_VER)
 #pragma once
-#endif
 
-#ifndef PBRT_SAMPLERS_BESTCANDIDATE_H
-#define PBRT_SAMPLERS_BESTCANDIDATE_H
 
 // samplers/bestcandidate.h*
 #include "sampler.h"
@@ -79,4 +75,4 @@ private:
 BestCandidateSampler *CreateBestCandidateSampler(const ParamSet &params, const Film *film,
     const Camera *camera);
 
-#endif // PBRT_SAMPLERS_BESTCANDIDATE_H
+

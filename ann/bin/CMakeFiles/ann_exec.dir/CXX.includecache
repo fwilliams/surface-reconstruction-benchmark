@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/ANN/ANN.h
+cstdlib
+-
+cmath
+-
+iostream
+-
+cstring
+-
+cvalues
+-
+climits
+-
+cfloat
+-
+
+/Users/teseo/Desktop/reconstruction/reconbench-master/ann/sample/ann_sample.cpp
+cstdlib
+-
+cstdio
+-
+cstring
+-
+fstream
+-
+ANN/ANN.h
+-
+

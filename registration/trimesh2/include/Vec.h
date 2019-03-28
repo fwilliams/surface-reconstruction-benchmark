@@ -70,6 +70,14 @@ using std::sqrt;
 #  endif
 #endif
 
+// Utility functions for square and cube, to go along with sqrt and cbrt
+template <class T>
+static inline T sqr(const T &x)
+{
+	return x*x;
+}
+
+
 
 // Boost-like compile-time assertion checking
 template <bool X> struct VEC_STATIC_ASSERTION_FAILURE;
@@ -475,12 +483,6 @@ static inline T trinorm(const T &v0, const T &v1, const T &v2)
 }
 
 
-// Utility functions for square and cube, to go along with sqrt and cbrt
-template <class T>
-static inline T sqr(const T &x)
-{
-	return x*x;
-}
 
 template <class T>
 static inline T cube(const T &x)

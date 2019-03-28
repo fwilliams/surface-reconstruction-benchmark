@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/BinaryHelper.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/IOManager.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/OMFormat.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/reader/BaseReader.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/reader/OBJReader.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/reader/OFFReader.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/reader/OMReader.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/reader/PLYReader.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/reader/STLReader.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/reader/ply.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/writer/BaseWriter.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/writer/OBJWriter.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/writer/OFFWriter.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/writer/OMWriter.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/IO/writer/STLWriter.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Mesh/ArrayKernel.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Mesh/BaseKernel.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Mesh/PolyConnectivity.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Mesh/PolyMeshT.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Mesh/TriConnectivity.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Mesh/TriMeshT.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/System/omstream.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Templates/newClass.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Templates/newClassT.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Utils/BaseProperty.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Utils/Endian.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Core/Utils/SingletonT.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Tools/Utils/Gnuplot.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Tools/Utils/MeshCheckerT.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Tools/Utils/StripifierT.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Tools/Utils/Timer.cc.o"
+  "CMakeFiles/OpenMesh.dir/OpenMesh/Tools/Utils/conio.cc.o"
+  "libOpenMesh.pdb"
+  "libOpenMesh.a"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/OpenMesh.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

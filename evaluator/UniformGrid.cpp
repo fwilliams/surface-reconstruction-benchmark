@@ -82,12 +82,18 @@ void UniformGrid::map_to_grid(Vector3 _pt, int& x_grid, int& y_grid, int& z_grid
 void UniformGrid::add_point(GridPoint _pt)  {
 	int gx, gy, gz;
 	this->map_to_grid(_pt.pt, gx, gy, gz);
+	//xxxxxxxx
+	if(gx < 0 || gy < 0 || gz < 0)
+		return;
 	uniform_grid[gz][gy][gx]->add_point(_pt);
 }
 
 bool UniformGrid::remove_point(Vector3 _pt)  {
 	int gx, gy, gz;
 	this->map_to_grid(_pt, gx, gy, gz);
+	//xxxxxxxx
+	if(gx < 0 || gy < 0 || gz < 0)
+		return false;
 	return uniform_grid[gz][gy][gx]->remove_point(_pt);
 }
 
@@ -101,6 +107,10 @@ void UniformGrid::neighborhood_query(Vector3 _pt, double _radius, vector<GridPoi
 	int ll_x, ll_y, ll_z, ur_x, ur_y, ur_z;
 	this->map_to_grid(ll_sphere, ll_x, ll_y, ll_z);
 	this->map_to_grid(ur_sphere, ur_x, ur_y, ur_z);
+
+	//xxxxxxxxxx
+	if(ll_x < 0 || ll_y < 0 || ll_z < 0)
+		return;
 
 	for(int z = ll_z; z <= ur_z; z++)  {
 		for(int y = ll_y; y <= ur_y; y++)  {

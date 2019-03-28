@@ -91,10 +91,11 @@ public:
 		(i.e. the ith row begins at val[row[i]]).
 	@param c column-indices: c[i] denotes the column location of val[i]
 */
+//???????????????????
 template <class T>
 Sparse_Matrix_CompRow<T>::Sparse_Matrix_CompRow(int M, int N, int nz,
 	const T *val, const int *r, const int *c) : val_(nz,val), 
-		rowptr_(M, r), colind_(nz, c), dim1_(M), dim2_(N) {}
+		rowptr_(M, *r), colind_(nz, *c), dim1_(M), dim2_(N) {}
 
 
 }

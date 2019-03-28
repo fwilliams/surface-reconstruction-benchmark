@@ -515,7 +515,7 @@ void ReconEvaluation::compute_mesh_correspondence()  {
 	int num_prints = 50;
 	int num_hits = 0;
 	int num_invalid = 0;
-	int div_prints = n_mesh_points/num_prints;
+	int div_prints = std::max(1, n_mesh_points/num_prints);
 
 	int valid_tris = 0;
 	bool is_signed_distance_inverted = shape->is_signed_distance_inverted();

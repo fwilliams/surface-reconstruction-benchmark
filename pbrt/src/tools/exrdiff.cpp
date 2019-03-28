@@ -3,11 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ImfInputFile.h>
-#include <ImfChannelList.h>
-#include <ImfFrameBuffer.h>
-#include <ImfRgbaFile.h>
-#include <half.h>
+#include <OpenEXR/ImfInputFile.h>
+#include <OpenEXR/ImfChannelList.h>
+#include <OpenEXR/ImfFrameBuffer.h>
+#include <OpenEXR/ImfRgbaFile.h>
+#include <OpenEXR/half.h>
 #include <assert.h>
 
 using namespace Imf;

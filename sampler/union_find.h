@@ -51,12 +51,15 @@ class UFSet  {
 		bool perform_union(UFEntity<Entity>* entity1, UFEntity<Entity>* entity2)  {
 			UFEntity<Entity>* entity1_root = this->find(entity1);
 			UFEntity<Entity>* entity2_root = this->find(entity2);
+			//??????????????????
+			const int r1 = entity1_root->rank;
+			const int r2 = entity2_root->rank;
 
-			if(entity1_root->rank > entity2_root->rank)  {
+			if(r1 > r2)  {
 				entity2_root->parent = entity1_root;
 				return true;
 			}
-			else if(entity1_root->rank < entity2_root->rank)  {
+			else if(r1 < r2)  {
 				entity1_root->parent = entity2_root;
 				return true;
 			}

@@ -181,7 +181,7 @@ public:
   inline VertexHandle new_vertex(const Point& _p)
   {
     VertexHandle vh(Kernel::new_vertex());
-    set_point(vh, _p);
+    this->set_point(vh, _p);
     return vh;
   }
 

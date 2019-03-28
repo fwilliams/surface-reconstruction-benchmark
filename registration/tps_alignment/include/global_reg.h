@@ -94,7 +94,9 @@ struct opts_t {
   // write an xf instead of a ply?
   bool read_xf, write_xf;
 
-  opts_t(int argc, char **argv) : write_individual_points(false),
+
+//???????????????????????????????
+  opts_t(int argc = 0, char **argv = NULL) : write_individual_points(false),
        rigid_prefix(NULL), nonrigid_prefix(NULL), affine_prefix(NULL),
        max_allowed_err(1000), min_allowed_stability(0.001f), min_allowed_max_stability(1),
        max_allowed_divergence(50), min_target_dist2(64), nthreads(1),
@@ -200,15 +202,19 @@ class threaded_alignment {
   // could just be member data.  But this leads to a marginally
   // less verbose initialization using memcpy.
   struct align_scan_struct {
-    const opts_t &opts;
-    const vector<char *> &mesh_names;
-    const vector<corr_vector> &corrs;
-    const vector<point> &targets;
-    const vector<bool> &use_points;
-    const vector<float> &confidence;
+    const opts_t opts;
+    const vector<char *> mesh_names;
+    const vector<corr_vector> corrs;
+    const vector<point> targets;
+    const vector<bool> use_points;
+    const vector<float> confidence;
     TriMesh *points_mesh;
-    const vector<TriMesh::Face> &all_faces;
+    const vector<TriMesh::Face> all_faces;
     threaded_alignment *ta;
+
+    // align_scan_struct(const opts_t &opts, const vector<char *> &mesh_names, const vector<corr_vector> &corrs, const vector<point> &targets, const vector<bool> &use_points, const vector<float> &confidence, const vector<TriMesh::Face> &all_faces)
+    // : opts(opts), mesh_names(mesh_names), corrs(corrs), targets(targets), use_points(use_points), confidence(confidence), all_faces(all_faces)
+    // { }
   } data;
 
   static void *alignment_thread(void *data) {

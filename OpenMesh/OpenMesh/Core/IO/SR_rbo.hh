@@ -76,11 +76,7 @@ namespace IO {
 function body which will result in a linker error */
 
 template < size_t N > inline 
-void _reverse_byte_order_N(uint8_t* _val)
-{
-  assert_compile(false);
-//   compile_time_error__only_for_fundamental_types(_val);
-}
+void _reverse_byte_order_N(uint8_t* _val);
 
 
 template <> inline
@@ -139,15 +135,15 @@ void _reverse_byte_order_N<16>(uint8_t* _val)
 // reverting pointers makes no sense, hence forbid it.
 /** this does not compile for g++3.4 and higher, hence we comment the 
 function body which will result in a linker error */
-template <typename T> inline T* reverse_byte_order(T* t)
-{
+template <typename T> inline T* reverse_byte_order(T* t);
+// {
   // Should never reach this point. If so, then some operator were not
   // overloaded. Especially check for IO::binary<> specialization on
   // custom data types.
 //   compile_time_error__cannot_do_that(a);
-  assert_compile(false);
-  return t;
-}
+  // assert_compile(false);
+  // return t;
+// }
 
 inline void compile_time_error__no_fundamental_type()
 {

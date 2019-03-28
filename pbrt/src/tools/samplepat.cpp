@@ -69,6 +69,8 @@ void BestCandidate2D(float table[][2],
                      int count, RNG &rng, SampleGrid *grid = NULL);
 static void
 Redistribute2D(float samples[][2], SampleGrid &pixelGrid);
+//?????????????????????????
+#if 0
 int main() {
     RNG rng;
     // Compute image sample positions
@@ -151,6 +153,7 @@ int main() {
     fprintf(f, "};\n");
     return 0;
 }
+#endif
 
 
 void BestCandidate2D(float table[][2], int totalSamples,

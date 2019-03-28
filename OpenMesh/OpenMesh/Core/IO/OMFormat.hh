@@ -45,6 +45,7 @@
 #  include <limits>
 #endif
 
+
 //== NAMESPACES ==============================================================
 
 #ifndef DOXY_IGNORE_THIS
@@ -245,78 +246,8 @@ namespace OMFormat {
 
   // ------------------------------------------------------------ Helper
 
-    // -------------------- type information
-
-  template <typename T> bool is_float(const T&) 
-  { 
-#if defined(OM_MISSING_HEADER_LIMITS)
-    return !Utils::NumLimitsT<T>::is_integer();
-#else
-    return !std::numeric_limits<T>::is_integer; 
-#endif
-  }
-
-  template <typename T> bool is_integer(const T) 
-  { 
-#if defined(OM_MISSING_HEADER_LIMITS)
-    return Utils::NumLimitsT<T>::is_integer();
-#else
-    return std::numeric_limits<T>::is_integer; 
-#endif
-  }
-
-  template <typename T> bool is_signed(const T&) 
-  { 
-#if defined(OM_MISSING_HEADER_LIMITS)
-    return Utils::NumLimitsT<T>::is_signed();
-#else
-    return std::numeric_limits<T>::is_signed; 
-#endif
-  }
-
-  
   // -------------------- get size information
 
-  
-  // Convert size of type to Integer_Size
-#ifdef NDEBUG
-  template <typename T> Chunk::Integer_Size integer_size(const T&)
-#else
-  template <typename T> Chunk::Integer_Size integer_size(const T& d)
-#endif
-  {
-    assert( is_integer(d) );
-
-    switch( sizeof(T) )
-    {
-      case  1: return OMFormat::Chunk::Integer_8;
-      case  2: return OMFormat::Chunk::Integer_16;
-      case  4: return OMFormat::Chunk::Integer_32;
-      case  8: return OMFormat::Chunk::Integer_64;
-    }
-    return Chunk::Integer_Size(0);
-  }
-
-
-  // Convert size of type to FLoat_Size 
-#ifdef NDEBUG
-  template <typename T> Chunk::Float_Size float_size(const T&)
-#else
-  template <typename T> Chunk::Float_Size float_size(const T& d)
-#endif
-  {
-    assert( is_float(d) );
-
-    switch( sizeof(T) )
-    {
-      case  4: return OMFormat::Chunk::Float_32;
-      case  8: return OMFormat::Chunk::Float_64;
-      case 16: return OMFormat::Chunk::Float_128;
-    }
-    return Chunk::Float_Size(0);
-  }
-
-  
   /// Return size of header in bytes.
   inline size_t header_size(void) { return sizeof(Header); }
 
@@ -374,6 +305,35 @@ namespace OMFormat {
   Chunk::Header& operator << (Chunk::Header& hdr, const uint16 val);
 
 
+  // -------------------- type information
+
+  template <typename T> bool is_float(const T&) 
+  { 
+#if defined(OM_MISSING_HEADER_LIMITS)
+    return !Utils::NumLimitsT<T>::is_integer();
+#else
+    return !std::numeric_limits<T>::is_integer; 
+#endif
+  }
+
+  template <typename T> bool is_integer(const T) 
+  { 
+#if defined(OM_MISSING_HEADER_LIMITS)
+    return Utils::NumLimitsT<T>::is_integer();
+#else
+    return std::numeric_limits<T>::is_integer; 
+#endif
+  }
+
+  template <typename T> bool is_signed(const T&) 
+  { 
+#if defined(OM_MISSING_HEADER_LIMITS)
+    return Utils::NumLimitsT<T>::is_signed();
+#else
+    return std::numeric_limits<T>::is_signed; 
+#endif
+  }
+
   // -------------------- conversions (format type <- type/value)
 
   template <typename VecType>
@@ -394,6 +354,43 @@ namespace OMFormat {
   // calc minimum (power-of-2) number of bits needed
   Chunk::Integer_Size needed_bits( size_t s );
 
+  // Convert size of type to Integer_Size
+// #ifdef NDEBUG
+  // template <typename T> Chunk::Integer_Size integer_size(const T&)
+// #else
+  template <typename T> Chunk::Integer_Size integer_size(const T& d)
+// #endif
+  {
+    assert( is_integer(d) );
+
+    switch( sizeof(T) )
+    {
+      case  1: return OMFormat::Chunk::Integer_8;
+      case  2: return OMFormat::Chunk::Integer_16;
+      case  4: return OMFormat::Chunk::Integer_32;
+      case  8: return OMFormat::Chunk::Integer_64;
+    }
+    return Chunk::Integer_Size(0);
+  }
+
+  
+  // Convert size of type to FLoat_Size 
+#ifdef NDEBUG
+  template <typename T> Chunk::Float_Size float_size(const T&)
+#else
+  template <typename T> Chunk::Float_Size float_size(const T& d)
+#endif
+  {
+    assert( is_float(d) );
+
+    switch( sizeof(T) )
+    {
+      case  4: return OMFormat::Chunk::Float_32;
+      case  8: return OMFormat::Chunk::Float_64;
+      case 16: return OMFormat::Chunk::Float_128;
+    }
+    return Chunk::Float_Size(0);
+  }
 
   // Return the storage type (Chunk::Header::bits_)
   template <typename T> 
@@ -404,6 +401,10 @@ namespace OMFormat {
       ? (static_cast<unsigned int>(integer_size(val)))
       : (static_cast<unsigned int>(float_size(val)));
   }
+
+
+
+
 
   // -------------------- create/read version
 
