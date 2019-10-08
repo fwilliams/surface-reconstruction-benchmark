@@ -7,7 +7,7 @@ add_subdirectory(OpenMesh)
 add_subdirectory(pbrt)
 add_subdirectory(registration)
 
-find_package(Lapack)
+find_package(LAPACK)
 find_package(PNG)
 
 if(NOT ${LAPACK_FOUND})
@@ -43,7 +43,7 @@ SET(sampler_INCLUDE "sampler")
 
 add_library(Sampler ${sampler_SOURCES} ${sampler_HEADERS})
 target_include_directories(Sampler PUBLIC ${sampler_INCLUDE} ${PNG_INCLUDE_DIRS})
-target_link_libraries(Sampler PUBLIC ann OpenMesh pbrt tps ${PNG_LIBRARIES} ${PNG_LIBRARY} lapack blas)
+target_link_libraries(Sampler PUBLIC ann OpenMesh pbrt tps ${PNG_LIBRARIES} ${PNG_LIBRARY})
 target_compile_definitions(Sampler PUBLIC ${PNG_DEFINITIONS})
 
 
