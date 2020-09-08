@@ -1,6 +1,6 @@
 A Benchmark for Surface Reconstruction
 --------------------------------------
-This repository contains a working version of the code for the paper [A Benchmark for Surface Reconstruction](http://www.cs.utah.edu/~bergerm/recon_bench/) my Berger et. al.
+This repository contains a working version of the code for the paper [A Benchmark for Surface Reconstruction](http://vgc.poly.edu/files/berger/recon_bench/paper/tog.pdf) my Berger et. al.
 This repository modifies the original source code of the paper to compile on Linux and MacOS without changing the functionality. The repository includes the source code for surface modeling, sampling, reconstruction, evaluation, and plotting results. Here we provide details regarding the various executables necessary for each of these tasks. Throughout the description, we have provided example data and instructions on how to process the data to produce error plots.
 
 ## Compilation
