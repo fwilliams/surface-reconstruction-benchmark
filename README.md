@@ -12,11 +12,13 @@ The benchmark requires that the following dependencies be installed on the syste
 - gnuplot
 - epstopdf
 - cmake
+- OpenEXR
+- libtiff
 
 ### Installing Dependencies on Ubuntu
 To install the dependencies on Ubuntu, type
 ```
-sudo apt-get install libpng12-dev liblapack-dev libblas-dev ffmpeg gnuplot texlive-font-utils cmake
+sudo apt-get install libpng12-dev liblapack-dev libblas-dev ffmpeg gnuplot texlive-font-utils libtiff-dev openexr cmake
 ```
 
 ### Building the project on Mac and Linux
