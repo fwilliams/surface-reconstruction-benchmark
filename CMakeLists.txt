@@ -23,7 +23,6 @@ endif()
 # Sources
 file(GLOB_RECURSE Modeling_SOURCES "modeling/*.cpp")
 file(GLOB_RECURSE Modeling_HEADERS "modeling/*.h")
-
 SET(Modeling_INCLUDE "modeling")
 
 add_library(Modeling ${Modeling_SOURCES} ${Modeling_HEADERS})
@@ -53,7 +52,6 @@ target_compile_definitions(Sampler PUBLIC ${PNG_DEFINITIONS})
 
 # Sources
 file(GLOB_RECURSE evaluator_HEADERS "evaluator/*.h")
-
 set(evaluator_SOURCES
 	evaluator/GlobalStats.cpp
 	evaluator/ShortestDistanceMap.cpp
@@ -121,5 +119,14 @@ target_link_libraries(single_distribution PUBLIC Modeling Sampler)
 add_executable(sample_implicit ${evaluator_SOURCES} ${evaluator_HEADERS} sample_implicit.cpp)
 target_include_directories(sample_implicit PUBLIC ${evaluator_INCLUDE})
 target_link_libraries(sample_implicit PUBLIC Modeling Sampler)
+
+
+add_executable(mesh_to_implicit modeling/mesh_to_implicit.cpp)
+target_include_directories(mesh_to_implicit PUBLIC ${modeling_INCLUDE})
+target_link_libraries(mesh_to_implicit PUBLIC Modeling Sampler)
+
+add_executable(isosurface modeling/isosurface.cpp)
+target_include_directories(isosurface PUBLIC ${modeling_INCLUDE})
+target_link_libraries(isosurface PUBLIC Modeling Sampler)
 
 
