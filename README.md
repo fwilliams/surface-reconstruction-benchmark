@@ -35,7 +35,7 @@ make
 We allow for the creation of polygonal MPU implicit surfaces, obtained through approximating
 triangulated surface meshes:
 ```
-./bin/mesh_to_implicit surface_mesh implicit_surface min_samples fit_epsilon covering
+./build/mesh_to_implicit surface_mesh implicit_surface min_samples fit_epsilon covering
 ```
 where:
 - `surface_mesh` can be an off, obj, or ply mesh.
@@ -49,7 +49,7 @@ certain surface meshes may be difficult to fit shape functions to. Hence to faci
 provided a marching cubes implementation so that one may quickly observe the resulting zero-set of
 the implicit function:
 ```
-./bin/isosurface implicit_surface resolution output_surface
+./build/isosurface implicit_surface resolution output_surface
 ```
 where:
 - `implicit_surface` is the aforementioned MPU surface.
@@ -66,7 +66,7 @@ an optical triangulation-based scanner. We break up point cloud generation into 
 files, followed by executing the coniguration files to obtain the point cloud. To generate configuration files:
 
 ```
-./bin/pc_generator implicit_surface config_base ([param value])* ([param range min_value max_value number])*
+./build/pc_generator implicit_surface config_base ([param value])* ([param range min_value max_value number])*
 ```
 where:
 - `implicit_surface` is an MPU surface file - may be specified as absolute path, or if in reconbench directory,
@@ -114,7 +114,7 @@ directory. However, if you have generated your own implicits, you must generate 
 We have provided an executable to do so:
 
 ```
-./bin/implicit_uniform implicit_surface num_samples
+./build/implicit_uniform implicit_surface num_samples
 ```
 where:
 - `implicit_surface` is the MPU surface file.
@@ -122,7 +122,7 @@ where:
 
 Evaluation may then be performed as follows:
 ```
-./bin/run_evaluation reconstructed_mesh implicit_surface dense_sampling output_base write_correspondences
+./build/run_evaluation reconstructed_mesh implicit_surface dense_sampling output_base write_correspondences
 ```
 where:
 - `reconstructed_mesh` is the mesh output from the reconstruction algorithm.
@@ -144,15 +144,15 @@ We suggest running evaluation on the surfaces produced via Poisson Surface Recon
 From the .dist file(s) generated through evaluation, we allow for two different options in plotting the results.
 To generate a distribution over a single point cloud:
 ```
-./bin/single_distribution dist_file output_base
+./build/single_distribution dist_file output_base
 ```
 where:
-- `dist_file` is the .dist file generated through bin/run_evaluation.
+- `dist_file` is the .dist file generated through `build/run_evaluation`.
 - `output_base` is the base file name from which two plots, in pdf, will be generated. One is a box plot of the positional error distribution, and the other is a box plot of the normal error distribution. This is with respect to a single point cloud.
 
 To generate distribution plots over a collection of point clouds:
 ```
-./bin/aggregate_distribution dist_base num_pcs output_base
+./build/aggregate_distribution dist_base num_pcs output_base
 ```
 where:
 - `dist_base` is the base file name which the .dist files over all reconstruction evaluations reside. They must be numbered as dist_base_0.dist, dist_base_1.dist, ... dist_base_(num_pcs-1).dist.
@@ -161,7 +161,3 @@ where:
 
 We suggest running the plotting executables on the running example, both individual and aggregate distributions,
 to get a feel for the plotting.
-
-
-## Contact
-Please email `bergerm@cs.utah.edu` for any questions, comments, suggestions, and bug reporting. Also, please send an email if you are interested in contributing new data! We hope our reconstruction benchmark will grow over time, in order to provide a rich amount of data for surface reconstruction researchers and practitioners.
