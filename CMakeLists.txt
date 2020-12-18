@@ -42,7 +42,7 @@ SET(sampler_INCLUDE "sampler")
 
 add_library(Sampler ${sampler_SOURCES} ${sampler_HEADERS})
 target_include_directories(Sampler PUBLIC ${sampler_INCLUDE} ${PNG_INCLUDE_DIRS})
-target_link_libraries(Sampler PUBLIC ann OpenMesh pbrt tps ${PNG_LIBRARIES} ${PNG_LIBRARY})
+target_link_libraries(Sampler PUBLIC ann OpenMesh pbrt tps ${PNG_LIBRARIES} ${PNG_LIBRARY} Modeling)
 target_compile_definitions(Sampler PUBLIC ${PNG_DEFINITIONS})
 
 
@@ -129,4 +129,10 @@ add_executable(isosurface modeling/isosurface.cpp)
 target_include_directories(isosurface PUBLIC ${modeling_INCLUDE})
 target_link_libraries(isosurface PUBLIC Modeling Sampler)
 
+add_executable(pc_generator sampler/pc_generator.cpp)
+target_include_directories(pc_generator PUBLIC ${sampler_INCLUDE})
+target_link_libraries(pc_generator PUBLIC Sampler)
 
+add_executable(uniform_sampler ${evaluator_SOURCES}  ${evaluator_HEADERS} ${Modeling_HEADERS} ${sampler_HEADERS} sampler/run_uniform.cpp)
+target_include_directories(uniform_sampler PUBLIC ${sampler_INCLUDE} ${Modeling_INCLUDE} ${evaluator_INCLUDE})
+target_link_libraries(uniform_sampler PUBLIC Modeling Sampler)
