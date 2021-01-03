@@ -224,7 +224,7 @@ void UniformSampler::sample()  {
 		cout << timer.getComputation() << " : " << timer.getElapsedTime() << "s" << endl;
 	}
 
-	this->dump_to_movie();
+	// this->dump_to_movie();
 }
 
 void UniformSampler::dump_to_movie()  {
