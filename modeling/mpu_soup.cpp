@@ -313,7 +313,7 @@ int MPUOctree::partition_points(int* point_ids)  {
 
 	//cout << "num 3 corner: " << num_3corner << endl;
 
-	// FINALLY, check for a fucking corner of degree 4 motherfucker - same test as edge test, applied to all groups!
+	// FINALLY, check for a corner of degree 4 - same test as edge test, applied to all groups!
 	bool is_corner_4 = false;
 	int group_split = -1;
 	for(int i = 0; i < 3; i++)  {
